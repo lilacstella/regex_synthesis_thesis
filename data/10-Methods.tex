@@ -1,0 +1,197 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  Template code for the Undergraduate Research Scholars thesis program starting, updated by Undergraduate Research Scholars program staff. Version 6.0. Last Updated: Fall 2024
+%  Modified by Tawfik Hussein from the template code for TAMU Theses and Dissertations starting Spring 2018, authored by Sean Zachary Roberson. Version 3.17.09.
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                           SECTION II: METHODS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%__________(0)_________
+% Do not modify. This is the page heading
+
+% THIS LINE PUTS "2. METHODS" AT THE TOP OF THE PAGE, BOLD-FACED AND 14-PT
+\chapter{\MakeUppercase{Methods}}
+
+
+%___________________________________________
+% Subheading 1 (remove/add as needed)
+\vspace{-0.4em} % This line is added to preserve the double-spaced environment since the \section command                      adds an extra space
+\section{The AlphaRegex Algorithm}
+\vspace{-0.4em}
+
+\indent\indent AlphaRegex is a heuristic-driven algorithm for synthesizing regular expressions from user-provided examples. It models the synthesis task as a state-space search, beginning with an incomplete regex (a "hole") and iteratively expanding it into complete, valid expressions. The algorithm emphasizes simplicity, correctness, and efficiency by prioritizing low-cost states and eliminating unproductive ones using formal approximations. This section outlines the core mechanisms of AlphaRegex, including its mutation strategy, pruning heuristics, cost-based prioritization, and state representation. Readers seeking implementation-level details should refer to the original paper by Lee et al. \cite{lee_2016_synthesizing}.
+
+\begin{algorithm}
+    \caption{AlphaRegex Search}
+    \label{alg:alpha_regex_pseudocode}
+    \begin{algorithmic}[1]
+    \State $w \gets \square$
+    \While{$w \neq \emptyset$}
+    
+    \State $s \gets w.\text{pop()}$
+        \If{$s$ satisfies examples}
+            \State \Return $s$
+        \EndIf
+        \State $w \gets w\hspace{0.3em}\cup$ next states
+    \EndWhile
+    \State \Return no solution
+    \end{algorithmic}
+    \end{algorithm}
+
+
+\subsection{Algorithm}
+
+\indent \indent The AlphaRegex algorithm leverages a greedy search mechanism to synthesize regex from positive and negative examples. As seen in Algorithm~\ref{alg:alpha_regex_pseudocode}, AlphaRegex begins with an initial state consisting of a single placeholder (or "hole") representing an empty regex. From this minimal starting point, it enters a loop, expanding and evaluating candidate regex expressions. A candidate is considered valid if it matches all positive examples and rejects all negative examples. If a valid solution is found, the algorithm terminates; otherwise, it continues exploring new states derived by filling holes with regex constructs.
+
+\indent\indent As seen in Figure \ref{fig:transition_rules}, the process begins with a starting state represented by an empty regex tree. From this initial state, the algorithm enters a loop where it continually evaluates states pulled from the queue. For each state, it checks whether it meets the requirements of being a solution. A state is considered a solution if it matches all the positive examples and none of the negative examples. This validation ensures that the regex pattern adheres to the constraints of the problem.
+
+\indent\indent If a state is not a solution, the algorithm generates potential next states. This function fills in placeholders ($\Hsquare$) in the regex pattern with all possible values, such as constants (\texttt{a}, \texttt{b}), operators (\texttt{*}, \( \cdot \) concatenation, \( \cup \) union), or other elements like the empty string (\( \varepsilon \)) or empty language (\( \emptyset \)). The generation process explores all logical expansions of the current state, effectively branching out the search tree and allow the space of all possible regex to be searched. 
+
+\begin{figure}[ht]
+    \centering
+    \captionsetup{justification=centering}
+    \[
+    \frac{s_1 \to s_1'}{s_1 + s_2 \to s_1' + s_2}
+    \quad
+    \frac{s_2 \to s_2'}{s_1 + s_2 \to s_1 + s_2'}
+    \]
+
+    \[
+    \frac{s_1 \to s_1'}{s_1 \cdot s_2 \to s_1' \cdot s_2}
+    \quad
+    \frac{s_2 \to s_2'}{s_1 \cdot s_2 \to s_1 \cdot s_2'}
+    \]
+
+    \[
+    \frac{s \to s'}{s^* \to s'^*}
+    \]
+
+    \[
+    \frac{}{\square \to a} \quad a \in \Sigma
+    \quad
+    \frac{}{\square \to \epsilon}
+    \quad
+    \frac{}{\square \to \emptyset}
+    \]
+
+    \[
+    \frac{}{\square \to \square + \square}
+    \quad
+    \frac{}{\square \to \square \cdot \square}
+    \quad
+    \frac{}{\square \to \square^*}
+    \]
+    
+    \caption{This is the formal system for the next state function that is responsible for expanding the potential states to explore.}
+    \label{fig:transition_rules}
+\end{figure}
+
+\indent\indent In the exploration of states, the algorithm prioritizing states with the least cost at each step. This cost-based heuristic ensures that the algorithm iteratively narrows its search to states that are most likely to satisfy the given examples. If a state satisfies all positive examples while rejecting all negative examples, the algorithm concludes the search, identifying the synthesized regex. However, if the current state fails to meet these criteria, the algorithm expands its scope by exploring new states derived from the current representation, continuing the search in a systematic and cost-efficient manner. This greedy approach allows the algorithm to explore a theoretically infinite space of potential regex expressions while focusing computational resources on the most promising paths.
+
+\indent \indent To optimize the search and reduce computational time, AlphaRegex incorporates a set of powerful heuristics. One key optimization is dead state elimination, which ensures that states incapable of yielding a valid solution are pruned early. Dead states are identified using two complementary techniques: over-approximation and under-approximation. In over-approximation, all placeholders in a state are replaced with wildcard expressions (e.g., (.*) which represents any character for any length). If this generalized state fails to match any positive example, it is deemed a dead state. Conversely, in under-approximation, placeholders are replaced with the empty language, producing a highly restrictive form of the regex. If this restricted state matches any negative example, it is similarly classified as a dead state. By eliminating such states, the algorithm avoids unnecessary exploration of unproductive paths.
+
+\indent \indent Additionally, AlphaRegex employs heuristics to detect and remove redundant states, further streamlining the search process. The redundant states heuristic involves unrolling the stars in the regex states. As we go through and unroll various stars that exist in the state, many different variations that are future potential states can be measured now once again using the overestimate technique. If any of the generated varying states do not pass all of the positive examples, then this state is thus redundant and should also be eliminated. These simplifications reduce the complexity of the state space while preserving the integrity of the search.
+
+\indent\indent At its core, the algorithm employs a priority queue to manage the states (regex patterns) under consideration. The queue ensures that states with the highest likelihood of success---those with lower costs---are explored first. This prioritization helps streamline the search by focusing on the most promising options, minimizing unnecessary computation.
+
+\subsection{Role of Weights in Prioritizing Solutions}
+\indent\indent The cost function in AlphaRegex plays a pivotal role in determining the priority of states during the search process. By assigning weights to individual regex elements such as union (\( \cup \)), concatenation (\( \cdot \)), star (\( * \)), symbols, and holes (\( \square \)), the algorithm calculates the total cost of a state by traversing its structure and summing these weights. This traversal ensures that the cost reflects the complexity of the regex, with simpler states generally having lower costs.
+
+\indent\indent The weights assigned to each element influence the order in which states are expanded. For instance, states with fewer operations or simpler structures are prioritized, as they are more likely to yield concise solutions. This prioritization aligns with the algorithm's goal of finding the shortest valid regex first, ensuring efficiency in the search process.
+
+\indent\indent By dynamically adjusting the weights, the algorithm can adapt its exploration strategy to emphasize certain types of solutions or balance between exploration and exploitation. This flexibility makes the cost function a critical component in guiding the search towards optimal solutions while avoiding unnecessary computation.
+
+\subsection{Implementation Notes}
+\indent\indent The implementation of AlphaRegex relies on a binary-tree-like structure to represent regular expressions. Each node in the tree corresponds to a regex element, with leaf nodes representing constants (symbols) or holes, and internal nodes representing operators such as concatenation, union, or star. For example, the regex "aabb" could be represented as a tree where the root is a concatenation node with two children as concatenations with their corresponding children: the symbols "a" twice, "b" twice.
+
+\indent\indent We decided on an implementation that allows unions and concatenations to have an arbitrary number of children, rather than being restricted to binary operators for a better time simplifying equivalent regex to something more human readable. This flexibility enables the representation of complex regex patterns while maintaining a clear hierarchical structure. The tree structure facilitates efficient manipulation and traversal during the search process, allowing for easy expansion and pruning of states.
+
+\indent\indent When the regex is needed in its standard form, the tree is flattened into a string representation. This flattening process traverses the tree in a depth-first manner, converting the hierarchical structure into a linear sequence of regex elements. This approach ensures that the tree representation remains efficient for manipulation during the search process, while still allowing for easy conversion to a usable regex format when required. For further details and to actually use the prototype, refer to the exact source code provided in Appendix A.
+
+\vspace{-0.4em}
+\section{L* Learner Algorithm}
+\vspace{-0.4em}
+
+\indent\indent The L* learner algorithm, introduced by Dana Angluin in 1987, is a foundational method in the field of formal language learning. It is designed to infer a deterministic finite automaton (DFA) that recognizes an unknown regular language through a series of structured interactions with a minimally adequate teacher (MAT). The MAT provides answers to membership queries, indicating whether a given string belongs to the language, and supplies counterexamples when the learner's conjectured DFA is incorrect. By iteratively refining its hypothesis based on this feedback, the L* algorithm converges on a correct DFA that accurately represents the target language. \cite{angluin_1987_learning}
+
+\indent\indent Unlike exhaustive search-based approaches like AlphaRegex, the L* algorithm is procedural and always yields a proposal DFA in poynomial time, leveraging the structure of regular languages and the power of queries to minimize the number of interactions required. The following sections delve into the design, implementation, and challenges of the L* algorithm, highlighting its role as a cornerstone in the study of formal methods and automated learning.
+
+\subsection{Algorithm}
+
+\indent\indent As seen in Algorithm \ref{alg:l_star_pseudocode}, at the core of L* is the construction and refinement of an observation table, which serves as the foundation for building a deterministic finite automaton (DFA). The MAT facilitates this process by providing answers to membership queries and supplying counterexamples when the learner's conjectures are incorrect. These interactions allow the observation table to capture detailed information about the regular set being learned, classifying strings over the alphabet based on their membership in the set. As the learner proposes hypotheses about the nature of the regular set, the MAT tests these hypotheses against the actual set. Counterexamples are particularly valuable as they highlight specific discrepancies between the learner's current understanding and the true regular set, guiding the learner to adjust its hypothesis in a direction that systematically reduces these discrepancies. This iterative refinement continues until the learner's model accurately reflects the regular set, as verified by the absence of further counterexamples from the MAT. 
+
+\begin{algorithm}
+    \caption{L* Observation Table Construction}
+    \label{alg:l_star_pseudocode}
+    \begin{algorithmic}[1]
+    \State $S \gets \{ \lambda \}$
+    \State $E \gets \{ \lambda \}$
+    \State $A \gets$ alphabet
+    \State $T \gets$ membership in language
+    \State $O \gets (S, E, T)$
+    \Repeat
+        \While{$O$ is not closed or consistent}
+            \If{$O$ is not closed}
+                \State find $s_1 \in S$ and $a \in A$
+                \State such that $row(s_1 \cdot a) \neq row(s)$ for all $s \in S$
+                \State add $s_1 \cdot a$ to $S$
+            \EndIf
+            \If{$O$ is not consistent}
+                \State find $s_1$ and $s_2 \in S$, $a \in A$, and $e \in E$
+                \State such that $row(s_1) = row(s_2)$ and $T(s_1 \cdot a \cdot e) \neq T(s_2 \cdot a \cdot e)$
+            \EndIf
+        \EndWhile
+    \Until Teacher agrees with conjecture $M$
+    \State \Return $M$
+    \end{algorithmic}
+    \end{algorithm}
+
+You can find an example of the L* algorithm in action in Appendix B. The algorithm begins with an empty observation table, which is iteratively filled with strings and their corresponding membership statuses. The MAT provides feedback on the membership of these strings, allowing the learner to refine its understanding of the language. As the observation table evolves, it becomes closed and consistent, indicating that it accurately represents the language being learned.
+
+\subsection{Implementation Notes}
+
+\indent\indent To convert the DFA generated by the L* algorithm into a regular expression, we employ Brzozowski's algebraic method. This method systematically eliminates states from the DFA while preserving its language, ultimately reducing the DFA to a single regular expression that represents the language. The process involves constructing equations for each state in the DFA, where the equations describe the transitions and accepting conditions of the states. By iteratively solving these equations and eliminating states, we derive a regular expression that captures the language of the DFA.
+
+\indent\indent The implementation of this method begins by representing the DFA as a system of equations, where each equation corresponds to a state and expresses its behavior in terms of transitions to other states. For a state \( q_i \), the equation takes the form:
+\[
+R_i = \bigcup_{q_j \in Q} \sigma_{ij} \cdot R_j \cup \varepsilon \text{ (if \( q_i \) is accepting)},
+\]
+where \( \sigma_{ij} \) represents the transition label from \( q_i \) to \( q_j \), \( R_j \) is the regular expression for state \( q_j \), and \( \varepsilon \) accounts for the possibility of \( q_i \) being an accepting state.
+
+\begin{algorithm}
+    \caption{Brzozowski's State Elimination Method}
+    \label{alg:brzozowski}
+    \begin{algorithmic}[1]
+    \State Initialize equations for all states in the DFA
+    \While{more than one state remains}
+        \State Select a state \( q \) to eliminate
+        \For{each pair of states \( (q_i, q_j) \) with transitions through \( q \)}
+            \State Update the equation for \( q_i \) to bypass \( q \)
+        \EndFor
+        \State Remove \( q \) and its equation from the system
+    \EndWhile
+    \State \Return the regular expression for the remaining state
+    \end{algorithmic}
+\end{algorithm}
+
+\indent\indent States are eliminated, as shown in Algorithm \ref{alg:brzozowski}, one by one by substituting their equations into the remaining equations, effectively removing the state while preserving the language. This process continues until only the start state and a single accepting state remain, at which point the resulting equation directly represents the desired regular expression.
+
+\indent\indent This method ensures that the resulting regular expression is equivalent to the language recognized by the original DFA. By integrating this conversion step, we standardize the output of the L* algorithm, enabling direct comparison with the results of the AlphaRegex algorithm. \cite{brzozowski_1964_derivatives}
+
+\vspace{-0.4em}
+\section{LLM-Generated Regular Expressions}
+\vspace{-0.4em}
+
+\indent\indent With the advent of large language models (LLMs) such as OpenAI's ChatGPT-4-O, generating regular expressions has become more accessible to users without extensive knowledge of formal languages. To assess the performance of ChatGPT-4-O, we provided it with a series of natural language prompts describing simple regular expression tasks. These prompts were designed to elicit basic regex patterns, such as matching specific strings, character classes, or simple repetitions. For consistency, the prompts avoided complex constructs or ambiguous descriptions, ensuring that the generated regex could be directly compared to those produced by algorithmic methods.
+
+\indent\indent To ensure consistency and comparability, we crafted a prompt specifically designed to elicit a regex using only concatenation, union, and Kleene star operations. The prompt includes a clear description of the desired regex, followed by a list of positive and negative examples. This structured format ensures that the LLM generates a regex adhering to the specified constraints. The format of the prompt is as follows:
+
+
+\begin{quote}
+Generate a standard regex with only concatenation, union, and stars, according to the following description. The first line is the regex description, followed by a line with "++" for positive examples, then a list of positive examples, then a line with "--" for negative examples, and finally a list of negative examples.
+\end{quote}
+

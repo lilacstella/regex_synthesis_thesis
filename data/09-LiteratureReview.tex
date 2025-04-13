@@ -1,0 +1,56 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  Template code for the Undergraduate Research Scholars thesis program starting, updated by Undergraduate Research Scholars program staff. Version 6.0. Last Updated: Fall 2024
+%  Modified by Tawfik Hussein from the template code for TAMU Theses and Dissertations starting Spring 2018, authored by Sean Zachary Roberson. Version 3.17.09.
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                           SECTION I: INTRODUCTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%______(0)______
+% Do not modify. This is the page heading
+
+% THIS LINE PUTS "1. INTRODUCTION" AT THE TOP OF THE PAGE, BOLD-FACED AND 14-PT (REQUIRED PAGE - DO NOT REMOVE)
+\chapter{\MakeUppercase{Literature Review}}
+
+%________(1)______
+% Modifications Needed!
+% THIS IS THE SECTION WHERE YOU TYPE IN THE TEXT RELATED TO YOUR INTRODUCTION. NOTICE THE DOUBLE \indent COMMAND THAT PROPERLY INDENTS THE BEGINNING OF EACH PARAGRAPH
+%
+
+\section{Historical Perspective on Program Synthesis}
+
+\indent\indent The desire to automate programming tasks has existed nearly as long as programming itself. In fact, program synthesis can be seen as a natural extension of compilation, with the goal of narrowing the semantic gap between human-level intent and machine-level execution. Where compilers translate precise, complete source code into machine instructions, synthesis aspires to generate that source code from higher-level, often incomplete, specifications. Computer science, at its core, has always aimed to build tools and models that convert abstract logic into executable behavior, and program synthesis is one of its purest manifestations \cite{solarlezama_2023_introduction}.
+
+\section{Program Synthesis Approaches}
+
+\vspace{-0.4em}
+
+\indent\indent Research in program synthesis has produced a wide range of approaches, each grounded in different assumptions about how users communicate intent and how synthesis engines evaluate correctness. Two major families of synthesis techniques are \textit{inductive synthesis} and \textit{deductive synthesis}. Inductive synthesis focuses on learning programs from a set of concrete examples, often called Programming by Example (PBE). This approach tries to generalize a program that matches provided input-output pairs, but must do so under uncertainty due to underspecification \cite{winston_1970}\cite{kitzelmann_2010_inductive}. Deductive synthesis, on the other hand, constructs programs from logical specifications using theorem proving or constraint solving. These methods offer strong guarantees but often require formal specifications that are difficult for non-experts to write.
+
+\indent\indent Another axis of classification relates to the direction and structure of the search process. \textit{Explicit search} methods, which are most often bottom-up or top-down, systematically enumerate and evaluate potential program candidates by applying grammar rules to generate expressions. These methods do not rely on learned models or probabilistic inference; instead, they explore the program space in a structured and interpretable way. Explicit search ensures that no candidate is proposed without a formal justification and often integrates pruning strategies to eliminate unpromising or redundant paths \cite{solarlezama_2023_introduction}.
+
+\indent\indent \textit{Bottom-up search} in this context starts from simple atomic expressions—like constants or minimal regex patterns—and composes them into more complex structures. Although conceptually straightforward, this can quickly generate a large number of syntactically valid but semantically irrelevant candidates. Therefore, bottom-up search often includes observational equivalence checks or cost-based heuristics to prioritize promising paths.
+
+\indent\indent \textit{Top-down search}, on the other hand, begins with a high-level incomplete program—typically containing holes or placeholders—and attempts to refine it by recursively filling in those parts. This allows the synthesizer to preserve global structural constraints while focusing search efforts on the most relevant sub-expressions. The use of partial evaluation, type information, or semantic filtering often makes top-down explicit search more efficient and targeted than its bottom-up counterpart.
+
+\section{User Intention Guidance}
+
+\vspace{-0.4em}
+
+\indent\indent One of the persistent challenges in program synthesis is inferring the user's true intent from sparse or ambiguous inputs. To mitigate this, systems have introduced ways for users to explicitly or implicitly guide the synthesis process. A notable innovation in this space is \textit{program sketching}, where users write partial programs containing holes or placeholders, leaving the synthesizer to fill in the gaps. Sketching reduces the need for formal specification expertise and allows users to encode high-level structural intent directly \cite{solarlezama_2012_program}. This technique has shown promise in both educational settings and industrial applications, offering a powerful human-in-the-loop approach to synthesis.
+
+\section{Regular Expressions and Their Challenges}
+
+\vspace{-0.4em}
+
+\indent\indent Regular expressions (regex) are widely used for pattern matching, lexical analysis, and data validation tasks. Despite their ubiquity and formal simplicity, regex is often perceived as unintuitive and error-prone. The syntax is compact and symbolic, making it powerful but difficult to read, write, and debug—especially for those without formal training. These usability challenges have led to increased interest in automatically generating regex from examples, specifications, or natural language descriptions.
+
+\indent\indent Formally, regular expressions describe the class of regular languages, which correspond to patterns recognized by deterministic finite automata (DFAs). A DFA is a finite-state machine that consumes input strings one symbol at a time and transitions through states according to fixed rules. If the machine ends in an accepting state, the string is accepted by the language. DFAs are equivalent in expressive power to regular expressions, and this equivalence can be proven constructively using algorithms such as Brzozowski's derivative-based method, which incrementally builds a DFA from a regex specification. 
+
+
+
+

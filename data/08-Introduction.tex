@@ -1,0 +1,91 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  Template code for the Undergraduate Research Scholars thesis program starting, updated by Undergraduate Research Scholars program staff. Version 6.0. Last Updated: Fall 2024
+%  Modified by Tawfik Hussein from the template code for TAMU Theses and Dissertations starting Spring 2018, authored by Sean Zachary Roberson. Version 3.17.09.
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                           SECTION I: INTRODUCTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%______(0)______
+% Do not modify. This is the page heading
+
+% THIS LINE PUTS "1. INTRODUCTION" AT THE TOP OF THE PAGE, BOLD-FACED AND 14-PT (REQUIRED PAGE - DO NOT REMOVE)
+\chapter{INTRODUCTION}
+
+%________(1)______
+% Modifications Needed!
+% THIS IS THE SECTION WHERE YOU TYPE IN THE TEXT RELATED TO YOUR INTRODUCTION. NOTICE THE DOUBLE \indent COMMAND THAT PROPERLY INDENTS THE BEGINNING OF EACH PARAGRAPH
+
+\indent\indent A central goal of software engineering is to faithfully translate user intent into executable code that runs correctly on a machine. This transformation—bridging human ideas with computational logic—is at the heart of program synthesis, a field dedicated to the automatic generation of purposeful, correct code from high-level specifications. This presents major benefits—ranging from reducing the cost and complexity of software development to improving code quality and safety. Central to this effort is the notion of program synthesis, which seeks to transform high-level specifications into executable programs, ideally requiring minimal human intervention. This thesis engages with program synthesis from both a theoretical and practical perspective, aiming to build a system that generates functional, minimal programs based on test-driven constraints.
+
+\indent\indent Program synthesis reduces the cognitive and logistical burden of programming. Writing software is often tedious, error-prone, and time-consuming. Developers repeatedly solve similar problems in slightly different ways across domains. By leveraging automation, we can offload tasks like boilerplate generation, routine logic, and even algorithm design to synthesis systems. This makes programming more accessible to non-experts and allows experienced developers to focus on higher-level design concerns. Importantly, the synthesis process has the potential to produce correct-by-construction programs, mitigating bugs and inconsistencies early in development.
+
+\indent\indent Unlike traditional programming, where a developer manually translates requirements into code, synthesis systems aim to infer intent from a set of examples, specifications, or natural language descriptions. The challenge is to ensure that the output program not only satisfies all provided constraints but also aligns with the user's implicit expectations—such as readability, generality, and performance. This introduces a trade-off between formal correctness and human-aligned utility.
+
+\indent\indent At a high level, program synthesis is a search problem over a (usually infinite) space of candidate programs. Each candidate is evaluated against constraints—often defined as input-output examples, logical formulas, or type annotations—and strategies are applied to explore the search space efficiently. Exhaustive enumeration is rarely feasible, so modern synthesis techniques rely on pruning unpromising paths, guiding the search with heuristics, and, increasingly, using probabilistic or neural methods to guess good candidates.
+
+\indent\indent Currently, the literature breaks down program synthesis into three conceptual pillars \cite{gottschlich_2018_the}:
+
+\begin{enumerate}
+\item \textbf{Intention}: How does the user convey what they want? This may be done via examples, natural language, sketches, or constraints.
+\item \textbf{Invention}: What algorithms and techniques generate the program? This encompasses symbolic search, machine learning, logic-based reasoning, and hybrid models.
+\item \textbf{Adaptation}: How does the program integrate with its environment? Adaptation includes type inference, refactoring, and context-awareness.
+\end{enumerate}
+
+\indent\indent In this thesis, we primarily focus on the first two pillars: \textit{intention} and \textit{invention}. Our goal is to examine how different synthesis methodologies interpret user-provided constraints and how well they generate minimal, correct, and expressive solutions. Later sections will also explore how humans might better express their intent through improved test design or specification writing.
+
+\indent\indent Program synthesis emphasizes not just correctness, but also alignment with user expectations. A solution such as a verbose switch-case statement may meet all functional requirements but fail to generalize or be useful in real-world development. Thus, elegance, minimalism, and maintainability are essential qualities. A well-synthesized program is one that satisfies the constraints while maintaining simplicity and avoiding overfitting.
+
+\indent\indent This thesis specifically examines the synthesis of regular expressions (regex). Regular expressions are a core tool in text processing, validation, and extraction, widely used across many domains. They are highly expressive yet notoriously difficult to write, read, and debug, especially for non-experts. This complexity—paired with their concise formal definition—makes regex a strong test bed for studying program synthesis. Automating regex generation from examples not only advances our understanding of synthesis algorithms but also offers practical value by alleviating a common pain point in software development.
+
+\indent\indent Throughout the thesis, we will explore different synthesis approaches for generating regex from constraints, compare their performance, and investigate their limitations. We begin with an in-depth review of current techniques in program synthesis and proceed to evaluate three methods—AlphaRegex (heuristic search), the L* algorithm (procedural learning), and LLMs (neural generation)—through empirical and theoretical lenses. In doing so, we aim to uncover how synthesis tools can be made more efficient, interpretable, and user-friendly, ultimately bringing us closer to bridging the gap between human intent and machine-generated code.
+
+\vspace{-0.4em}
+\section{Scope of Research}
+\vspace{-0.4em}
+
+\indent\indent Regular expressions offer an ideal domain for exploring program synthesis due to their constrained grammar, well-defined semantics, and broad applicability in software development tasks. Unlike general-purpose programming languages, regex has a relatively limited set of operations, making the search space tractable for many synthesis algorithms while still presenting significant challenges in correctness, efficiency, and usability. Furthermore, regex is frequently used by developers across different experience levels, often leading to errors or inefficiencies that automation can help mitigate.
+
+\indent\indent Despite their ubiquity, regular expressions are widely known in the programming community as being difficult to write and understand. In fact, their complexity and opacity have become the subject of a long-standing joke among developers: "Some people, when confronted with a problem, think 'I know, I'll use regular expressions.' Now they have two problems." This humor reflects a deeper truth—regex operates under a different computational model than most developers are used to. Rather than resembling imperative control flow or object-oriented abstractions, regex corresponds to a more mathematical model rooted in formal language theory.
+
+\indent\indent To appreciate the relevance of regex to program synthesis, it helps to understand its theoretical foundations. Regular expressions describe the class of 	extit{regular languages}, which are precisely those recognized by deterministic or nondeterministic finite automata (DFAs or NFAs). A deterministic finite automaton (DFA) is an abstract machine that processes input strings symbol by symbol, transitioning through a finite set of states according to a fixed set of rules. If the input string leads the machine into an accepting state, the string is considered part of the language the DFA recognizes. This model of computation is simple but powerful—it enables fast, predictable evaluation of strings and forms the backbone of many practical tools in programming languages and compilers. In the context of the theory of computation, regular languages represent the simplest class of problems that machines can solve—forming the lowest level in the Chomsky hierarchy of formal languages \cite{chomsky_1956_three}. These are languages that can be recognized without the need for memory or a stack, meaning they are computationally limited compared to full-fledged programming languages, but they are still powerful enough to encode many practical string-processing tasks.
+
+\indent\indent  The class of regular languages is a strict subset of those problems solvable by a Turing machine, the abstract model underlying modern programming languages \cite{sipser_1996_introduction}. By studying synthesis in this restricted space, we can test our ideas and algorithms in a mathematically rigorous and computationally tractable setting. It is a way of starting small, while still engaging with real-world problems. If synthesis methods cannot handle the generation of regex—simple, constrained programs—they will certainly struggle with more general programming tasks.
+
+\indent\indent This thesis compares three distinct approaches to regex synthesis, each reflecting a unique methodology in program synthesis: Alpha Regex (heuristic search), L* (procedural learning), and large language models (neural generation). Alpha Regex performs an explicit search over regex structures, guided by heuristics and weight functions that help prioritize promising candidates. It aligns closely with traditional search-based methods in the literature. L*, by contrast, incrementally builds a deterministic finite automaton (DFA) from a teacher's feedback, producing equivalent regex representations through procedural refinement. While it guarantees correctness under ideal feedback, it heavily depends on the human teacher's accuracy. LLMs such as ChatGPT represent a different paradigm entirely—they generate regex from natural language or test descriptions but do so probabilistically, with no formal correctness guarantees.
+
+\indent\indent By studying these methodologies side by side, we aim to uncover insights not just about regex generation, but about the strengths and limitations of broader synthesis paradigms. Although our focus is on regex, the comparative framework and evaluation metrics developed here can be extended to other constrained domains, such as parser combinators, grammar induction, or domain-specific languages. The synthesis strategies, especially their integration into compositional or hybrid frameworks, may also offer insights into systems that combine multiple paradigms to improve performance, usability, and correctness.
+
+\indent \indent This thesis compares three distinct approaches to regex synthesis, each reflecting a unique methodology in program synthesis: Alpha Regex (heuristic search), L* (procedural learning), and large language models (neural generation). Alpha Regex performs an explicit search over regex structures, guided by heuristics and weight functions that help prioritize promising candidates. It aligns closely with traditional search-based methods in the literature. L*, by contrast, incrementally builds a deterministic finite automaton (DFA) from a teacher's feedback, producing equivalent regex representations through procedural refinement. While it guarantees correctness under ideal feedback, it heavily depends on the human teacher's accuracy. LLMs such as ChatGPT represent a different paradigm entirely—they generate regex from natural language or test descriptions but do so probabilistically, with no formal correctness guarantees.
+
+\indent \indent By studying these methodologies side by side, we aim to uncover insights not just about regex generation, but about the strengths and limitations of broader synthesis paradigms. Although our focus is on regex, the comparative framework and evaluation metrics developed here can be extended to other constrained domains, such as parser combinators, grammar induction, or domain-specific languages. The synthesis strategies, especially their combination or chaining, may also offer insights into hybrid systems that draw from multiple paradigms to improve performance and reliability.
+
+\vspace{-0.4em}
+\section{Central Research Questions}
+\vspace{-0.4em}
+
+\indent \indent This thesis is structured around three core research questions that aim to evaluate and improve the synthesis of regular expressions: 
+
+- How do the Alpha Regex, L* algorithm, and LLMs compare in terms of correctness, efficiency, and complexity when generating regular expressions? \\
+- Can these systems build off of each other to produce a better result overall? \\ 
+- How can the weights in AlphaRegex change how we prioritize the answers that it generates? \\
+
+\indent \indent These three methods differ not only in implementation but also in their underlying assumptions, guarantees, and interaction with user input. Correctness refers to whether the synthesized regex satisfies the user's constraints. Efficiency pertains to how quickly and resource-efficiently a method can produce a correct solution. Complexity, meanwhile, refers to the readability and generalization of the resulting regex.
+
+\indent \indent In the integration approach, the output of one system informs or constrains another—presents a compelling strategy for synthesizing more accurate and generalizable regex. For example, a language model might propose candidate expressions that Alpha Regex could refine or verify, or L* might bootstrap Alpha Regex's initial search space. 
+
+\indent \indent The second research question explores a more internal mechanism of Alpha Regex:  Alpha Regex relies on weighted heuristics to navigate its search space. These weights significantly affect which candidates are evaluated first and how quickly optimal solutions are found. Tuning these weights involves aligning them with implicit human notions of simplicity, coverage, or interpretability, making this an opportunity to investigate how algorithmic biases shape synthesis outcomes.
+
+\vspace{-0.4em}
+\section{Contributions}
+\vspace{-0.4em}
+
+First, we provide an in-depth experimental comparison of Alpha Regex, L*, and large language models, evaluating them on correctness, efficiency, and complexity. This comparison helps illuminate the trade-offs inherent to heuristic, procedural, and neural methods of synthesis.
+
+\indent \indent Second, we investigate the potential for integration synthesis methods, presenting preliminary strategies for combining the strengths of multiple approaches. These hybrid models offer a promising path toward more robust and adaptable synthesis systems.
+
+\indent \indent Third, we explore the role of weighting in Alpha Regex and how tuning these weights influences the prioritization and quality of generated regex. Through case studies and parameter tuning experiments, we show how different heuristics affect the structure and performance of synthesized expressions. 

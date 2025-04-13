@@ -1,0 +1,68 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  Template code for the Undergraduate Research Scholars thesis program starting, updated by Undergraduate Research Scholars program staff. Version 6.0. Last Updated: Fall 2024
+%  Modified by Tawfik Hussein from the template code for TAMU Theses and Dissertations starting Spring 2018, authored by Sean Zachary Roberson. Version 3.17.09.
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                           SECTION IV: CONCLUSION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%________(0)__________
+% Do not modify. This is the page heading.
+
+
+% THIS LINE ADDS THE CONCLUSION TO THE TABLE OF CONTENTS
+%\addcontentsline{toc}{chapter}{\vspace{1.0em}\hspace{1.0em} IV.\hspace{2em}CONCLUSION} 
+
+
+%__________(1)_________
+% Modification Needed!
+
+% THIS IS THE SECTION WHERE YOU TYPE IN THE TEXT RELATED TO YOUR CONCLUSION. NOTICE THE DOUBLE \indent COMMAND THAT PROPERLY INDENTS THE BEGINNING OF EACH PARAGRAPH
+
+\chapter{CONCLUSION AND FUTURE WORK}
+
+\indent\indent This thesis explored three distinct methods for synthesizing regular expressions from examples: AlphaRegex, the L* algorithm, and large language models (LLMs). Each method reflects a different paradigm of synthesis—heuristic search, procedural learning, and neural generation respectively. Our primary research questions focused on how these methods compare in terms of correctness, efficiency, and complexity, and whether combining them can improve performance.
+
+\indent\indent Based on our evaluations, AlphaRegex showed strong performance in producing readable and valid regex when guided by carefully tuned weights. L* reliably generated correct and minimal regex in simpler cases but struggled when feedback quality degraded. LLMs demonstrated fast and intuitive outputs but required manual validation due to inconsistencies and overfitting. While each technique had clear trade-offs, preliminary attempts at chaining them—such as LLMs seeding AlphaRegex—proved promising.
+
+\indent\indent Broadly, our findings support the idea that no single synthesis strategy is sufficient for all cases. A hybrid approach that leverages the strengths of symbolic control, procedural guarantees, and neural priors offers a practical path forward. These insights suggest valuable directions for both synthesis system design and the creation of user-facing tools in developer environments.
+
+\section{Human-in-the-Loop Synthesis}
+
+\indent\indent A major takeaway from our work is the importance of human participation in guiding synthesis. In the context of regex, the design and quality of test cases play a pivotal role. Future work should investigate:
+
+\begin{itemize}
+  \item \textbf{What makes a good test?} We propose studying metrics like coverage, discriminative power, and regularity to evaluate test quality.
+  \item \textbf{How can test quality be measured?} One direction is defining a scoring function based on how well tests isolate failure modes across candidate solutions.
+  \item \textbf{How can non-experts be supported?} Future systems might include test suggestion engines, visual feedback, or prompt scaffolding to help users write better inputs.
+\end{itemize}
+
+\section{Tooling and Usability}
+
+\indent\indent Beyond algorithms, usability plays a critical role in synthesis adoption. We propose several improvements:
+
+\begin{itemize}
+  \item \textbf{UX for test-driven synthesis:} Interfaces should highlight failure points, visualize input coverage, and offer dynamic guidance.
+  \item \textbf{Test scaffolding tools:} Synthesis systems could suggest additional positive or negative examples to improve solution generalization.
+  \item \textbf{Prompt engineering assistants:} LLM-based tools might help users formulate clearer queries by interpreting ambiguous intent and asking clarifying questions.
+\end{itemize}
+
+\section{Expanded Evaluation}
+
+\indent\indent While our benchmark suite covered a range of common patterns, further work is needed to stress-test scalability and generality:
+
+\begin{itemize}
+  \item \textbf{Broader benchmark sets:} Future evaluations should include more diverse and domain-specific examples, such as date/time patterns or log filters.
+  \item \textbf{Complex regex structures:} Synthesizers should be evaluated on nested quantifiers, lookaheads, and optional groups.
+  \item \textbf{Beyond regex:} The insights and tooling developed here could apply to synthesis tasks in other domain-specific languages (DSLs), such as data wrangling scripts, configuration files, or parser generators.
+\end{itemize}
+
+\vspace{1em}
+
+\noindent In closing, this thesis demonstrates that the synthesis of regular expressions remains a rich problem space for exploring fundamental challenges in programming-by-example, system design, and human-machine interaction. Our contributions lay the groundwork for future synthesis systems that are more intelligent, collaborative, and accessible.
+
+
+
+
