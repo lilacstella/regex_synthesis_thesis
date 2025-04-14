@@ -190,10 +190,9 @@ where \( \sigma_{ij} \) represents the transition label from \( q_i \) to \( q_j
 
 \indent\indent With the advent of large language models (LLMs) such as OpenAI's GPT-4o, generating regular expressions has become more accessible to users without extensive knowledge of formal languages. To assess the performance of GPT-4o, we provided it with a series of natural language prompts describing simple regular expression tasks. These prompts were designed to elicit basic regex patterns, such as matching specific strings, character classes, or simple repetitions. For consistency, the prompts avoided complex constructs or ambiguous descriptions, ensuring that the generated regex could be directly compared to those produced by algorithmic methods.
 
-\indent\indent To ensure consistency and comparability, we crafted a prompt specifically designed to elicit a regex using only concatenation, union, and Kleene star operations. The prompt includes a clear description of the desired regex, followed by a list of positive and negative examples. This structured format ensures that the LLM generates a regex adhering to the specified constraints. The format of the prompt is as follows:
+\indent\indent To ensure consistency and comparability, we crafted a prompt specifically designed to elicit a regex using only concatenation, union, and Kleene star operations. The prompt includes a clear description of the desired regex, followed by a list of positive and negative examples. This structured format ensures that the LLM generates a regex adhering to the specified constraints. 
 
 
-\begin{quote}
-Generate a standard regex with only concatenation, union, and stars, according to the following description. The first line is the regex description, followed by a line with "++" for positive examples, then a list of positive examples, then a line with "--" for negative examples, and finally a list of negative examples.
-\end{quote}
-
+TODO
+- i want the model to take in the same input as alpha regex with a natural language description of the regex, and then a list of positive and negative examples.
+- i want the model to only use the standard set of regex with limited operations
