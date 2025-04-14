@@ -64,13 +64,9 @@
 
 \indent\indent By focusing on the theoretical core of regex, we aim to develop synthesis methods that are both rigorous and extensible. Future work could explore how these methods might be adapted to handle the more complex constructs found in practical regex engines, bridging the gap between theoretical elegance and real-world applicability.
 
-\indent\indent This thesis compares three distinct approaches to regex synthesis, each reflecting a unique methodology in program synthesis: Alpha Regex (heuristic search), L* (procedural learning), and large language models (neural generation). Alpha Regex performs an explicit search over regex structures, guided by heuristics and weight functions that help prioritize promising candidates. It aligns closely with traditional search-based methods in the literature. L*, by contrast, incrementally builds a deterministic finite automaton (DFA) from a teacher's feedback, producing equivalent regex representations through procedural refinement. While it guarantees correctness under ideal feedback, it heavily depends on the human teacher's accuracy. LLMs such as ChatGPT represent a different paradigm entirely—they generate regex from natural language or test descriptions but do so probabilistically, with no formal correctness guarantees.
+\indent\indent This thesis compares three distinct approaches to regex synthesis, each reflecting a unique methodology in program synthesis: Alpha Regex (heuristic search), L* (procedural learning), and large language models (neural generation). Alpha Regex performs an explicit search over regex structures, guided by heuristics and weight functions that help prioritize promising candidates. It aligns closely with traditional search-based methods in the literature. L*, by contrast, incrementally builds a DFA from a teacher's feedback, producing equivalent regex representations through procedural refinement. While it guarantees correctness under ideal feedback, it heavily depends on the human teacher's accuracy. LLMs such as ChatGPT represent a different paradigm entirely—they generate regex from natural language or test descriptions but do so probabilistically, with no formal correctness guarantees.
 
 \indent\indent By studying these methodologies side by side, we aim to uncover insights not just about regex generation, but about the strengths and limitations of broader synthesis paradigms. Although our focus is on regex, the comparative framework and evaluation metrics developed here can be extended to other constrained domains, such as parser combinators, grammar induction, or domain-specific languages. The synthesis strategies, especially their integration into compositional or hybrid frameworks, may also offer insights into systems that combine multiple paradigms to improve performance, usability, and correctness.
-
-\indent \indent This thesis compares three distinct approaches to regex synthesis, each reflecting a unique methodology in program synthesis: Alpha Regex (heuristic search), L* (procedural learning), and large language models (neural generation). Alpha Regex performs an explicit search over regex structures, guided by heuristics and weight functions that help prioritize promising candidates. It aligns closely with traditional search-based methods in the literature. L*, by contrast, incrementally builds a deterministic finite automaton (DFA) from a teacher's feedback, producing equivalent regex representations through procedural refinement. While it guarantees correctness under ideal feedback, it heavily depends on the human teacher's accuracy. LLMs such as ChatGPT represent a different paradigm entirely—they generate regex from natural language or test descriptions but do so probabilistically, with no formal correctness guarantees.
-
-\indent \indent By studying these methodologies side by side, we aim to uncover insights not just about regex generation, but about the strengths and limitations of broader synthesis paradigms. Although our focus is on regex, the comparative framework and evaluation metrics developed here can be extended to other constrained domains, such as parser combinators, grammar induction, or domain-specific languages. The synthesis strategies, especially their combination or chaining, may also offer insights into hybrid systems that draw from multiple paradigms to improve performance and reliability.
 
 \vspace{-0.4em}
 \section{Central Research Questions}
@@ -78,13 +74,15 @@
 
 \indent \indent This thesis is structured around three core research questions that aim to evaluate and improve the synthesis of regular expressions: 
 
-- How do the Alpha Regex, L* algorithm, and LLMs compare in terms of correctness, efficiency, and complexity when generating regular expressions? \\
-- Can these systems build off of each other to produce a better result overall? \\ 
-- How can the weights in AlphaRegex change how we prioritize the answers that it generates? \\
+\begin{enumerate}
+    \item How do the Alpha Regex, L* algorithm, and LLMs compare in terms of correctness, efficiency, and complexity when generating regular expressions?
+    \item Can these systems build off of each other to produce a better result overall?
+    \item How can the weights in AlphaRegex change how we prioritize the answers that it generates?
+\end{enumerate}
 
-\indent \indent These three methods differ not only in implementation but also in their underlying assumptions, guarantees, and interaction with user input. Correctness refers to whether the synthesized regex satisfies the user's constraints. Efficiency pertains to how quickly and resource-efficiently a method can produce a correct solution. Complexity, meanwhile, refers to the readability and generalization of the resulting regex.
+\indent \indent The three different systems in generating regex differ not only in implementation but also in their underlying assumptions, guarantees, and interaction with user input. Correctness refers to whether the synthesized regex satisfies the user's constraints. Efficiency pertains to how quickly and resource-efficiently a method can produce a correct solution. Complexity, meanwhile, refers to the readability and generalization of the resulting regex.
 
-\indent \indent In the integration approach, the output of one system informs or constrains another—presents a compelling strategy for synthesizing more accurate and generalizable regex. For example, a language model might propose candidate expressions that Alpha Regex could refine or verify, or L* might bootstrap Alpha Regex's initial search space. 
+\indent \indent In the integration approach, the output of one system informs or constrains another presents a compelling strategy for synthesizing more accurate and generalizable regex. For example, a language model might propose candidate expressions that Alpha Regex could refine or verify, or L* might bootstrap the initial search space of AlphaRegex. 
 
 \indent \indent The second research question explores a more internal mechanism of Alpha Regex:  Alpha Regex relies on weighted heuristics to navigate its search space. These weights significantly affect which candidates are evaluated first and how quickly optimal solutions are found. Tuning these weights involves aligning them with implicit human notions of simplicity, coverage, or interpretability, making this an opportunity to investigate how algorithmic biases shape synthesis outcomes.
 
@@ -92,7 +90,9 @@
 \section{Contributions}
 \vspace{-0.4em}
 
-First, we provide an in-depth experimental comparison of Alpha Regex, L*, and large language models, evaluating them on correctness, efficiency, and complexity. This comparison helps illuminate the trade-offs inherent to heuristic, procedural, and neural methods of synthesis.
+TODO come back and look at this section
+
+\indent\indent First, we provide an in-depth experimental comparison of Alpha Regex, L*, and large language models, evaluating them on correctness, efficiency, and complexity. This comparison helps illuminate the trade-offs inherent to heuristic, procedural, and neural methods of synthesis.
 
 \indent \indent Second, we investigate the potential for integration synthesis methods, presenting preliminary strategies for combining the strengths of multiple approaches. These hybrid models offer a promising path toward more robust and adaptable synthesis systems.
 
