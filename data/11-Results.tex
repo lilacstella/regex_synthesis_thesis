@@ -209,23 +209,25 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 \end{tabular}
 \end{table}
 
-let's analyze the results in Table~\ref{tab:llm_outputs}, 
+\indent\indent Upon reviewing the results in Table~\ref{tab:llm_outputs}, we observe that for benchmarks 1 through 6, as well as benchmark 9, the LLM-generated regex expressions exactly match the manually authored ground truth. These examples represent problems where the target expression is relatively simple and where only a single minimal and semantically clean regex is likely. The convergence between the LLM output and the human-written regex in these cases suggests that the model is not just generating plausible-looking patterns, but also capturing the underlying structure when it aligns well with common training examples.
 
-1-6, 9 of the llm output exactly matches mine, we think thats because there is really only one optimal good solution, which is also the simplest and yeah it makes sense
-7 is correct and valid solution $(b*ab*ab*ab*)*b*$, though it could be simplified more if some of the $b*$ were to be distributed out to be potentialy expanded rather than strapped to three $a$'s. 8 has the same behavior. and maybe this is beneficial? the approach i opted for is as short of a regex string as possible, but this could be more expressive and human readable because the expansions are explicitly listed rather than being referred to from one layer up
-10, the model opt for using a union to capture starting with an a or starting with a b, but that's not really necessary and could be a lot shorter. This does not make it more human readable either
-11 is a little more difficult yet it still matched my regex exactly
-12 is incorrect because it allows for the $b$'s to not be even, which is not allowed according to the specification
-13, 17, as mentioned before are correct answers but they all could be slightly simplified.
-14, 15, 18, counting off by 1 error
-16 is not valid regex, it is trying to also accept the empty string, but that syntax is wrong. the ? operator cannot be used independently
-19 is incorrect because it does not account that the first term $(aa|ab|ba?|bb)*$ could repeat to produce $bbaa$, by using the first term and the last term once each, following the $*$ for this term, which produces the invalid string
-20 is exactly correct, capturing all of the possible nuance
-21 is incorrect because the $aa(b|ab)*$ can finish result in $aaab$ which is actually two pairs of $aa$'s, which is not allowed. 
-22 is almost correct, it does not account for the case that length of the word could be less than 2, which automatically makes it so it does not end with $ba$ and thus satisfies the condition.
-23 is correct and very human-readable, but there are simplifications and reductions that can be applied, like for example getting rid of that $b*$ in the last part will do completely the same part
-24 there is an $(a|b)*$ is just $.*$ and that can produce the double a which is after the guaranteed $bb$ and that is not allowed, so this is incorrect
-25 is wrong because $bb(a|ba)*$ can produce $bbba$, which is not allowed.
+\indent\indent For benchmarks 7 and 8, the model produced correct and valid solutions, such as $(b*ab*ab*ab*)*b*$ for benchmark 7. While semantically accurate, these expressions are longer than necessary and could be simplified. However, the verbosity in these outputs arguably improves readability by making the intended repetitions more explicit. In contrast, the ground truth prioritizes minimal string length, often at the cost of visual clarity. This discrepancy raises an interesting point: readability and brevity do not always align, and models trained on human-written code may favor explicit enumeration over abstraction.
+
+\indent\indent Benchmark 10 highlights a situation where the LLM unnecessarily introduces a union to distinguish between inputs beginning with a or b. Although the result is functionally correct, the added complexity neither enhances correctness nor readability, and it contrasts with the simpler expected solution. In benchmark 11, despite its slightly increased complexity, the model again matched the correct regex exactly.
+
+\indent\indent From benchmark 12 onward, the correctness rate declines. Benchmark 12 is incorrect because it allows for an odd number of b characters, violating the requirement that bs appear in even counts. Benchmarks 13 and 17, while correct in behavior, exhibit syntactic redundancy that could be removed with minor simplification. For example, patterns with nested repetitions or excessive alternations can often be flattened without affecting correctness.
+
+\indent\indent Benchmarks 14, 15, and 18 all display a common off-by-one counting error—a recurring failure mode for LLMs in tasks that involve precise cardinality constraints. These errors reveal the model's difficulty in reasoning about exact quantities, a known limitation in sequence modeling.
+
+\indent\indent Benchmark 16 contains invalid regex syntax, misusing the ? operator without a preceding token. The intended goal may have been to include optional content, but the structure used violates standard regex grammar. Similarly, benchmark 19 is logically flawed: the use of $$(aa|ab|ba?|bb)*$$ followed by a suffix expression can incorrectly accept strings like bbaa, which should be rejected. This occurs because of incorrect assumptions about how the starred term interacts with the rest of the expression.
+
+\indent\indent In contrast, benchmark 20 is entirely correct, demonstrating that the model can occasionally capture subtle constraints when the structure of the problem is well-aligned with common representations. However, benchmark 21 fails due to overpermissiveness. The pattern $aa(b|ab)*$ accepts strings like aaab, which includes two pairs of consecutive as—violating the task specification.
+
+\indent\indent Benchmark 22 is nearly correct, but misses a boundary case: it fails to handle strings with fewer than two characters, which should automatically satisfy the negated condition of “not ending in ba.” Benchmark 23 is both correct and highly human-readable, though there are opportunities for syntactic reduction, such as eliminating unnecessary $b*$ terms in the suffix. This speaks again to the tension between brevity and expressiveness.
+
+\indent\indent Finally, benchmarks 24 and 25 are incorrect due to subtle logic flaws. In 24, the use of $(a|b)*$ is too permissive and allows the occurrence of double a after bb, violating the restriction. In 25, the model allows bbba via $bb(a|ba)*$, a construction that does not correctly constrain repetition patterns involving pairs of bs.
+
+\indent\indent Overall, the model's strongest performance appears in problems that are well-aligned with familiar symbolic patterns, especially those involving prefixes, suffixes, or fixed-length structural constraints. As tasks begin to involve negation, exact counting, or nested disjunctions, correctness degrades. Notably, even incorrect outputs often resemble the correct structure, suggesting that the model maintains a surface-level understanding of the domain—but without the formal rigor needed for correctness in all cases.
 \section{Qualitative Observations}
 
 \indent\indent we also look at the quality of the regex generated by each of the three methods. We qualitatively analyzed the generated regex from each method, focusing on readability, complexity, and correctness. The results are summarized below:
