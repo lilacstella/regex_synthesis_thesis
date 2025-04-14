@@ -93,7 +93,7 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 
 \section{Experimental Setup}
 
-\indent\indent We implemented AlphaRegex and L* in Python and the code is readily available as seen in Appendix~A. LLM queries were issued through the OpenAI GPT-4o API (March 2025 snapshot).
+\indent\indent We implemented AlphaRegex and L* in Python and the code is readily available as seen in Appendix~A. LLM queries were issued through the OpenAI GPT-4o API (March 2025 snapshot) with a defined system prompt detailing the upcoming inputs.
 
 \chapter{RESULTS AND DISCUSSION}
 
@@ -101,31 +101,31 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 
 \section{AlphaRegex Results}
 
-\indent\indent In the original configuration, weights, and heuristics as described in the original paper, the findings indicate that the heuristics do not consistently improve wall-clock time performance. This is likely due to the overhead associated with verifying solutions against all examples. Specifically, the redundancy elimination heuristic requires significant computational effort, as it involves copying and branching out potential equivalent states, which must then be validated against the entire set of examples. 
+\indent\indent In the original configuration, weights, and heuristics as described in the original paper, the findings indicate that the heuristics do not consistently improve wall-clock time performance as seen in Table~\ref{tab:alpha_regex_performance_seconds}. This is likely due to the overhead associated with verifying solutions against all examples. Specifically, the redundancy elimination heuristic requires significant computational effort, as it involves copying and branching out potential equivalent states, which must then be validated against the entire set of examples. 
+
+\begin{table}[h!]
+	\centering
+	\caption{Comparison of regex synthesis methods based on wall-clock time. Skipped entries indicate that the algorithm failed to find a solution within the 10,000-second time limit. "Full" refers to the complete process with all heuristics enabled, "No Apr" excludes over-approximation, and "No Rd" disables redundancy elimination. Times are reported in seconds.}
+	\label{tab:alpha_regex_performance_seconds}
+	\begin{tabular}{|c|p{5cm}|c|c|c|l|}
+	\hline
+	\textbf{No} & \textbf{Description} & \textbf{Full} & \textbf{No Apr} & \textbf{No Rd} & \textbf{Output} \\
+	\hline
+	1 & Starts with a & 0.011 & 0.008 & 0.002 & $a.*$ \\
+	2 & Ends with ab & 36.06 & 50.96 & 16.99 & $.*ab$ \\
+	4 & Begins with b and ends with a & 0.077 & 0.101 & 0.044 & $b.*a$ \\
+	5 & Length is at least 3 and the 3rd symbol is a & 0.587 & 0.585 & 0.284 & $..a.*$ \\
+	6 & Length is a multiple of 3 & 1.39 & 1.51 & 0.254 & $(...)*$ \\
+	8 & Even number of a's & 55.25 & 84.86 & 11.59 & $(b*(ab*a)*)*$ \\
+	11 & Each a in w is followed by at least one b & 9.63 & 9.71 & 1.58 & $(b*(.b)*)*$ \\
+	15 & Length greater than 1 & 0.058 & 0.0833 & 0.018 & $..*.$ \\
+	\hline
+\end{tabular}
+\end{table}
 
 \indent\indent Additionally, the implementation appears to encounter issues in scenarios requiring union operations. In the cases where the synthesis succeeds, the generated solutions exclusively utilize concatenation and Kleene star operations, with no unions present. This suggests a potential flaw in the implementation when handling union operations.
 
-\indent\indent Despite these challenges, the over-approximation and under-approximation heuristics occasionally provide substantial time savings, making their inclusion worthwhile in certain cases. However, when examining the number of states explored, the heuristics consistently demonstrate their effectiveness in reducing the search space. They reliably prune unnecessary states and guide the search process in a more efficient direction. This aligns with the findings of the original paper, which reported that while the heuristics were highly effective at limiting the search space, they did not always reduce the time required to find a solution. The overhead introduced by the heuristics could potentially be optimized further in the current implementation to improve overall performance.
-
-\begin{table}[h!]
-\centering
-\caption{Comparison of regex synthesis methods based on wall-clock time. Skipped entries indicate that the algorithm failed to find a solution within the 10,000-second time limit. "Full" refers to the complete process with all heuristics enabled, "No Apr" excludes over-approximation, and "No Rd" disables redundancy elimination. Times are reported in seconds.}
-\label{tab:alpha_regex_performance_seconds}
-\begin{tabular}{|c|p{5cm}|c|c|c|l|}
-\hline
-\textbf{No} & \textbf{Description} & \textbf{Full} & \textbf{No Apr} & \textbf{No Rd} & \textbf{Output} \\
-\hline
-1 & Starts with a & 0.011 & 0.008 & 0.002 & $a.*$ \\
-2 & Ends with ab & 36.06 & 50.96 & 16.99 & $.*ab$ \\
-4 & Begins with b and ends with a & 0.077 & 0.101 & 0.044 & $b.*a$ \\
-5 & Length is at least 3 and the 3rd symbol is a & 0.587 & 0.585 & 0.284 & $..a.*$ \\
-6 & Length is a multiple of 3 & 1.39 & 1.51 & 0.254 & $(...)*$ \\
-8 & Even number of a's & 55.25 & 84.86 & 11.59 & $(b*(ab*a)*)*$ \\
-11 & Each a in w is followed by at least one b & 9.63 & 9.71 & 1.58 & $(b*(.b)*)*$ \\
-15 & Length greater than 1 & 0.058 & 0.0833 & 0.018 & $..*.$ \\
-\hline
-\end{tabular}
-\end{table}
+\indent\indent Despite these challenges, the over-approximation and under-approximation heuristics occasionally provide substantial time savings, making their inclusion worthwhile in certain cases. However, when examining the number of states explored in Table~\ref{tab:alpha_regex_performance_states}, the heuristics consistently demonstrate their effectiveness in reducing the search space. They reliably prune unnecessary states and guide the search process in a more efficient direction. This aligns with the findings of the original paper, which reported that while the heuristics were highly effective at limiting the search space, they did not always reduce the time required to find a solution. The overhead introduced by the heuristics could potentially be optimized further in the current implementation to improve overall performance.
 
 \begin{table}[h!]
 	\centering
@@ -157,7 +157,16 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 
 \section{LLM Results}
 
-\indent\indent The resulting prompt that gave the model a sufficiently consistent performance is as follows:
+\indent\indent Developing an effective prompt for LLMs to generate regex using only the standard set of operators proved to be an iterative and somewhat delicate process. One of the persistent challenges was conveying that the input alphabet consisted solely of the characters $a$ and $b$. Despite multiple prompt refinements, the model frequently interpreted this constraint as a directive to use the explicit disjunction $(a|b)$, rather than the shorthand $.$ to represent any character within the defined alphabet. This behavior reflects a broader limitation of LLMs: they lack a formal understanding of semantic equivalence. In this case, they fail to recognize that $.$ and $(a|b)$ are functionally identical under a fixed alphabet.
+
+\indent\indent Another issue surfaced as the prompt history grew longer. Initially, the system prompt reliably constrained the model to use only standard regex operators. However, as additional benchmark prompts were introduced in sequence, the model began to drift from the original specification. Around benchmark 12, responses increasingly violated earlier constraints, suggesting that the LLM was "forgetting" the original instructions. This degradation highlights a fundamental limitation in prompt-based control: when engaging with LLMs interactively over extended sequences, it becomes difficult to maintain consistency, especially when relying solely on static system prompts.
+
+\indent\indent The model's reasoning style also shifted over time. For the first group of benchmarks (1-11), it produced one-shot answers—regex expressions without any explanation. All of these initial outputs were correct and closely aligned (or even exactly matched) with regex we had manually written. This suggests the model was likely retrieving or reconstructing known patterns from its training data. However, after beginning a new conversation with benchmark 12---without system-level reminders or reissued constraints---the model adopted a different approach. It began breaking down the prompt into logical steps, attempting to reason through the requirements before proposing a solution. This reasoning-based strategy produced correct results for benchmarks 12, 13, 17, and 22.
+
+\indent\indent One hypothesis is that the increased complexity of benchmark 12 prompted this behavioral shift. Once the model encountered a problem that didn't map cleanly onto a memorized pattern, it defaulted to reasoning. While sometimes helpful, this strategy proved less effective for simpler problems, where direct pattern recognition would have sufficed. As the benchmarks continued to grow in difficulty—particularly those involving negation or constraints requiring implicit counting—the model increasingly produced incorrect regex. Notably, it struggled with counting constructs, often failing to distinguish between mandatory and optional repetitions. For example, in attempting to describe "at least three $a$'s," it returned $aaa*$ instead of the correct $aaaa*$, mistakenly treating the third $a$ as optional.
+
+\indent\indent Overall, the LLM's early success with one-shot outputs correlated strongly with benchmark tasks that were simple and structurally familiar. As task complexity increased, the model's shift toward reasoning introduced more nuanced errors, often stemming from overgeneralization or misinterpretation of constraints. Nonetheless, even when incorrect, the outputs frequently resembled the structure of a valid solution—indicating that the model had some abstract grasp of the form, even if the details were flawed. These results reinforce the broader theme that LLMs excel at recalling surface-level patterns from training but falter under compositional reasoning, especially in domains that demand formal correctness.
+
 
 \begin{quote}
     This GPT takes a structured prompt consisting of a natural language description, a list of positive string examples, and a list of negative string examples. The format is: a one-line description, followed by '+++', then one or more positive examples, followed by '---', then one or more negative examples. Based on this, it generates a minimal theoretical regular expression using only the operations of concatenation, union, Kleene star, and the wildcard symbol '.'. It ensures that the generated expression accepts all positive examples and rejects all negative examples. The '?' symbol may be used to denote either a term or the empty language, when necessary. The alphabet is limited to 'a' and 'b', and the character 'X' in any input stands for a wildcard representing either 'a' or 'b'. When the output regex needs to match either 'a' or 'b', it uses '.' instead of '(a|b)' for minimality.
@@ -199,6 +208,8 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 	\hline
 \end{tabular}
 \end{table}
+
+
 
 \section{Qualitative Observations}
 
