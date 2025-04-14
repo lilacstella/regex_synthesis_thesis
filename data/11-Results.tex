@@ -72,7 +72,7 @@
 	17 & Contain at least one a and at most one b & 6 & 9 & $a*(ab?|b?a)a*$ \\
 	18 & At least two b between any two a & 7 & 7 & $(b*|abbb*a)*$ \\
 	19 & Does not contain baa & 8 & 4 & $a*(b|ba)*$ \\
-	20 & Every odd position is b & 6 & 9 & $(b.)*$ \\
+	20 & Every odd position is b & 6 & 9 & $(b.)*b?$ \\
 	21 & Consecutive pair aa appears exactly once & 4 & 4 & $(a?b)*aa(ba?)*$ \\
 	22 & Length $\ge 2$ and does not end with ba & 9 & 4 & $.*(aa|bb|ab)$ \\
 	23 & Even a's, each a is followed by at least one b & 6 & 9 & $(b|abb*ab)*$ \\
@@ -161,7 +161,7 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 
 \indent\indent Another issue surfaced as the prompt history grew longer. Initially, the system prompt reliably constrained the model to use only standard regex operators. However, as additional benchmark prompts were introduced in sequence, the model began to drift from the original specification. Around benchmark 12, responses increasingly violated earlier constraints, suggesting that the LLM was "forgetting" the original instructions. This degradation highlights a fundamental limitation in prompt-based control: when engaging with LLMs interactively over extended sequences, it becomes difficult to maintain consistency, especially when relying solely on static system prompts.
 
-\indent\indent The model's reasoning style also shifted over time. For the first group of benchmarks (1-11), it produced one-shot answers—regex expressions without any explanation. All of these initial outputs were correct and closely aligned (or even exactly matched) with regex we had manually written. This suggests the model was likely retrieving or reconstructing known patterns from its training data. However, after beginning a new conversation with benchmark 12---without system-level reminders or reissued constraints---the model adopted a different approach. It began breaking down the prompt into logical steps, attempting to reason through the requirements before proposing a solution. This reasoning-based strategy produced correct results for benchmarks 12, 13, 17, and 22.
+\indent\indent The model's reasoning style evolved over two sets of conversations. For the initial set of benchmarks (1-11), it generated one-shot answers—regex expressions without any accompanying explanation. These outputs were all correct and closely matched (or even exactly replicated) the manually written regex solutions, suggesting the model was likely retrieving or reconstructing familiar patterns from its training data. However, starting with benchmark 12 in a new conversation--—without system-level reminders or reissued constraints--—the model shifted its approach. It began breaking down the prompt into logical steps, reasoning through the requirements before proposing a solution. This reasoning-based approach yielded correct results for benchmarks 13, 17, and 22. However, these solutions often relied on enumerating all possible cases that satisfied the requirements, resembling a verbose switch-case structure in program synthesis. While functional, this approach lacks elegance and can hinder readability and maintainability.
 
 \indent\indent One hypothesis is that the increased complexity of benchmark 12 prompted this behavioral shift. Once the model encountered a problem that didn't map cleanly onto a memorized pattern, it defaulted to reasoning. While sometimes helpful, this strategy proved less effective for simpler problems, where direct pattern recognition would have sufficed. As the benchmarks continued to grow in difficulty—particularly those involving negation or constraints requiring implicit counting—the model increasingly produced incorrect regex. Notably, it struggled with counting constructs, often failing to distinguish between mandatory and optional repetitions. For example, in attempting to describe "at least three $a$'s," it returned $aaa*$ instead of the correct $aaaa*$, mistakenly treating the third $a$ as optional.
 
@@ -191,7 +191,7 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 	9 & Fifth symbol from the right is b & $.*b....$ \\
 	10 & Alternating a and b & $(ab)*(a)?|(ba)*(b)?$ \\
 	11 & Each a in w is followed by at least one b & $(b|ba)*$ \\
-	12 & a$^n$b$^m$ where $n \geq 3$ and $m$ is even. & $aaa.*(bb)*$ \\
+	12 & a$^n$b$^m$ where $n \geq 3$ and $m$ is even. & $aaa.*(bb)*$ \\ % wrong actually, allows for b to not be even
 	13 & Have at most two a's & $b*|b*ab*|b*ab*ab*$ \\ 
 	14 & Starting a and odd length or b and even length & $a(..)* | b(..)*$ \\ % wrong
 	15 & Length greater than 1 & $..*$ \\ % wrong
@@ -209,8 +209,23 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 \end{tabular}
 \end{table}
 
+let's analyze the results in Table~\ref{tab:llm_outputs}, 
 
-
+1-6, 9 of the llm output exactly matches mine, we think thats because there is really only one optimal good solution, which is also the simplest and yeah it makes sense
+7 is correct and valid solution $(b*ab*ab*ab*)*b*$, though it could be simplified more if some of the $b*$ were to be distributed out to be potentialy expanded rather than strapped to three $a$'s. 8 has the same behavior. and maybe this is beneficial? the approach i opted for is as short of a regex string as possible, but this could be more expressive and human readable because the expansions are explicitly listed rather than being referred to from one layer up
+10, the model opt for using a union to capture starting with an a or starting with a b, but that's not really necessary and could be a lot shorter. This does not make it more human readable either
+11 is a little more difficult yet it still matched my regex exactly
+12 is incorrect because it allows for the $b$'s to not be even, which is not allowed according to the specification
+13, 17, as mentioned before are correct answers but they all could be slightly simplified.
+14, 15, 18, counting off by 1 error
+16 is not valid regex, it is trying to also accept the empty string, but that syntax is wrong. the ? operator cannot be used independently
+19 is incorrect because it does not account that the first term $(aa|ab|ba?|bb)*$ could repeat to produce $bbaa$, by using the first term and the last term once each, following the $*$ for this term, which produces the invalid string
+20 is exactly correct, capturing all of the possible nuance
+21 is incorrect because the $aa(b|ab)*$ can finish result in $aaab$ which is actually two pairs of $aa$'s, which is not allowed. 
+22 is almost correct, it does not account for the case that length of the word could be less than 2, which automatically makes it so it does not end with $ba$ and thus satisfies the condition.
+23 is correct and very human-readable, but there are simplifications and reductions that can be applied, like for example getting rid of that $b*$ in the last part will do completely the same part
+24 there is an $(a|b)*$ is just $.*$ and that can produce the double a which is after the guaranteed $bb$ and that is not allowed, so this is incorrect
+25 is wrong because $bb(a|ba)*$ can produce $bbba$, which is not allowed.
 \section{Qualitative Observations}
 
 \indent\indent we also look at the quality of the regex generated by each of the three methods. We qualitatively analyzed the generated regex from each method, focusing on readability, complexity, and correctness. The results are summarized below:
