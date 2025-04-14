@@ -17,7 +17,9 @@
 
 \counterwithout{table}{chapter} % Prevents the table count from resetting in each chapter
 
-\indent\indent To evaluate the performance of the synthesis methods explored in this thesis—AlphaRegex, the L* algorithm, and large language models—we adapted a benchmark suite of 25 regular expression problems originally proposed in the AlphaRegex paper \cite{lee_2016_synthesizing}. These tasks include string containment, structural alternation, and sequence matching. As shown in Figure~\ref{fig:benchmark-example}, each benchmark begins with a natural language description of the regex problem, followed by a set of positive and negative examples. The benchmarks are loosely organized by increasing difficulty.
+\renewcommand*{\thefootnote}{\fnsymbol{footnote}}
+
+\indent\indent To evaluate the performance of the synthesis methods explored in this thesis—AlphaRegex, the L* algorithm, and large language models—we adapted a benchmark suite of 25 regular expression problems originally proposed\footnote{While working with the original benchmarks, we identified an issue in the benchmark examples for task 2 ("Ends with ab"). Specifically, the negative examples did not account for the case where the string consists solely of the character 'b', which does not end with "ab". This oversight could lead to incorrect evaluations of synthesis methods. We updated the benchmark to include this missing negative example, ensuring a more robust evaluation.} in the AlphaRegex paper \cite{lee_2016_synthesizing}. These tasks include string containment, structural alternation, and sequence matching. As shown in Figure~\ref{fig:benchmark-example}, each benchmark begins with a natural language description of the regex problem, followed by a set of positive and negative examples. The benchmarks are loosely organized by increasing difficulty.
 
 \begin{figure}[h!]
 	\centering
@@ -43,21 +45,6 @@
 	\label{fig:benchmark-example}
 \end{figure}
 
-\indent\indent As the different algorithms require different types of input, the evaluation process was tailored accordingly. ChatGPT and AlphaRegex were provided with the benchmark file in its entirety, including the natural language description and examples. For the L* algorithm, the natural language description was interpreted by a human to manually construct the required membership and equivalence queries.
-
-\section{Metrics}
-
-\indent\indent To comprehensively compare synthesis approaches, we defined three categories of evaluation metrics:
-Correctness was evaluated by determining whether a solution satisfied all positive examples and rejected all negative examples. Final validation was performed via human inspection to account for edge cases or oversimplified expressions. Efficiency metrics included the number of states explored for AlphaRegex, the number of membership and equivalence queries made for L*, and the wall-clock time required to generate results for all three methods. Complexity was assessed in three ways: total character count, the number of operators, and a subjective readability score ranging from 1 (unreadable) to 5 (clean and intuitive).
-
-\section{Experimental Setup}
-
-\indent\indent We implemented AlphaRegex and L* in Python and the code is readily available as seen in Appendix~A. LLM queries were issued through the OpenAI GPT-4o API (March 2025 snapshot).
-
-
-\chapter{RESULTS AND DISCUSSION}
-\section{Quantitative Results}
-
 \begin{table}[h!]
 	\centering
 	\label{tab:alpha_regex_benchmarks_summary}
@@ -67,8 +54,8 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 	\textbf{No} & \textbf{Description} & \textbf{Pos} & \textbf{Neg} & \textbf{Human-written} \\
 	\hline
 	1 & Starts with a & 3 & 3 & $a.*$ \\
-	2 & Ends with ab & 3 & 6 & $.*ab$ \\
-	3 & Contains the substring abab & 3 & 7 & $.*abab.*$ \\
+	2 & Ends with ab & 3 & 7 & $.*ab$ \\
+	3 & Contains the substring abab & 3 & 8 & $.*abab.*$ \\
 	4 & Begins with b and ends with a & 3 & 5 & $b.*a$ \\
 	5 & Length is at least 3 and the 3rd symbol is a & 3 & 4 & $..a.*$ \\
 	6 & Length is a multiple of 3 & 2 & 3 & $(...)*$ \\
@@ -94,6 +81,23 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 	\hline
 \end{tabular}
 \end{table}
+
+
+
+\indent\indent As the different algorithms require different types of input, the evaluation process was tailored accordingly. ChatGPT and AlphaRegex were provided with the benchmark file in its entirety, including the natural language description and examples. For the L* algorithm, the natural language description was interpreted by a human to manually construct the required membership and equivalence queries.
+
+\section{Metrics}
+
+\indent\indent To comprehensively compare synthesis approaches, we defined three categories of evaluation metrics:
+Correctness was evaluated by determining whether a solution satisfied all positive examples and rejected all negative examples. Final validation was performed via human inspection to account for edge cases or oversimplified expressions. Efficiency metrics included the number of states explored for AlphaRegex, the number of membership and equivalence queries made for L*, and the wall-clock time required to generate results for all three methods. Complexity was assessed in three ways: total character count, the number of operators, and a subjective readability score ranging from 1 (unreadable) to 5 (clean and intuitive).
+
+\section{Experimental Setup}
+
+\indent\indent We implemented AlphaRegex and L* in Python and the code is readily available as seen in Appendix~A. LLM queries were issued through the OpenAI GPT-4o API (March 2025 snapshot).
+
+\chapter{RESULTS AND DISCUSSION}
+
+\section{Quantitative Results}
 
 \indent\indent The table below summarizes the performance of each method on the 25 benchmark tasks. Correctness reflects the number of benchmarks where the generated regex matched all positive and negative examples. Efficiency and complexity metrics are averaged over all correct results.
 
