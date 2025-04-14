@@ -176,35 +176,35 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 	\centering
 	\caption{The results of the benchmarks synthesized by GPT-4o, demonstrating the performance of the LLM in generating regular expressions.}
 	\label{tab:llm_outputs}
-	\begin{tabular}{|c|l|l|}
+	\begin{tabular}{|c|l|l|l|}
 	\hline
-	\textbf{No} & \textbf{Description} & \textbf{Output} \\
+	\textbf{No} & \textbf{Description} & \textbf{Output} & \textbf{Correct?} \\
 	\hline
-	1 & Starts with a & $a.*$  \\
-	2 & Ends with ab & $.*ab$ \\
-	3 & Contains the substring abab & $.*abab.*$ \\
-	4 & Begins with b and ends with a & $b.*a$ \\
-	5 & Length is at least 3 and the 3rd symbol is a & $..a.*$ \\
-	6 & Length is a multiple of 3 & $(...)*$ \\
-	7 & Number of a's is divisible by 3 & $(b*ab*ab*ab*)*b*$ \\
-	8 & Even number of a's & $(b*ab*ab*)*b*$ \\
-	9 & Fifth symbol from the right is b & $.*b....$ \\
-	10 & Alternating a and b & $(ab)*(a)?|(ba)*(b)?$ \\
-	11 & Each a in w is followed by at least one b & $(b|ba)*$ \\
-	12 & a$^n$b$^m$ where $n \geq 3$ and $m$ is even. & $aaa.*(bb)*$ \\ % wrong actually, allows for b to not be even
-	13 & Have at most two a's & $b*|b*ab*|b*ab*ab*$ \\ 
-	14 & Starting a and odd length or b and even length & $a(..)* | b(..)*$ \\ % wrong
-	15 & Length greater than 1 & $..*$ \\ % wrong
-	16 & Does not end with ab & $?|.|.*(aa|ba|bb)$ \\ % wrong, close
-	17 & Contain at least one a and at most one b & $aa*|aa*ba*|a*baa*$ \\
-	18 & At least two b between any two a & $b*a(bb*a)*b*$ \\ % wrong
-	19 & Does not contain baa & $(aa|ab|ba?|bb)*a?$ \\ % wrong
-	20 & Every odd position is b & $(b.)*b?$ \\
-	21 & Consecutive pair aa appears exactly once & $(b|ab)*aa(b|ab)*$ \\ % wrong
-	22 & Length $\ge 2$ and does not end with ba & $.*(aa|bb|ab)$ \\
-	23 & Even a's, each a is followed by at least one b & $b*(abb*abb*)*b*$ \\ % the last b* in () doesn't need to be there
-	24 & All adjacent a's appear before any adjacent b's & $(a|ba)*(bb(a|b)*a?b*)?$ \\ % just plain wrong
-	25 & At most one pair of consecutive b's & $(a|ba)* | (a|ba)*bb(a|ba)*$ \\ % plain wrong
+	1 & Starts with a & $a.*$ & \tikzcmark \\
+	2 & Ends with ab & $.*ab$ & \tikzcmark \\
+	3 & Contains the substring abab & $.*abab.*$ & \tikzcmark \\
+	4 & Begins with b and ends with a & $b.*a$ & \tikzcmark \\
+	5 & Length is at least 3 and the 3rd symbol is a & $..a.*$ & \tikzcmark \\
+	6 & Length is a multiple of 3 & $(...)*$ & \tikzcmark \\
+	7 & Number of a's is divisible by 3 & $(b*ab*ab*ab*)*b*$ & \tikzcmark \\
+	8 & Even number of a's & $(b*ab*ab*)*b*$ & \tikzcmark \\
+	9 & Fifth symbol from the right is b & $.*b....$ & \tikzcmark \\
+	10 & Alternating a and b & $(ab)*(a)?|(ba)*(b)?$ & \tikzcmark \\
+	11 & Each a in w is followed by at least one b & $(b|ba)*$ & \tikzcmark \\
+	12 & a$^n$b$^m$ where $n \geq 3$ and $m$ is even. & $aaa.*(bb)*$ & \tikzxmark \\
+	13 & Have at most two a's & $b*|b*ab*|b*ab*ab*$ & \tikzcmark \\
+	14 & Starting a and odd length or b and even length & $a(..)* | b(..)*$ & \tikzxmark \\
+	15 & Length greater than 1 & $..*$ & \tikzxmark \\
+	16 & Does not end with ab & $?|.|.*(aa|ba|bb)$ & \tikzxmark \\
+	17 & Contain at least one a and at most one b & $aa*|aa*ba*|a*baa*$ & \tikzcmark \\
+	18 & At least two b between any two a & $b*a(bb*a)*b*$ & \tikzxmark \\
+	19 & Does not contain baa & $(aa|ab|ba?|bb)*a?$ & \tikzxmark \\
+	20 & Every odd position is b & $(b.)*b?$ & \tikzcmark \\
+	21 & Consecutive pair aa appears exactly once & $(b|ab)*aa(b|ab)*$ & \tikzxmark \\
+	22 & Length $\ge 2$ and does not end with ba & $.*(aa|bb|ab)$ & \tikzcmark \\
+	23 & Even a's, each a is followed by at least one b & $b*(abb*abb*)*b*$ & \tikzcmark \\
+	24 & All adjacent a's appear before any adjacent b's & $(a|ba)*(bb(a|b)*a?b*)?$ & \tikzxmark \\
+	25 & At most one pair of consecutive b's & $(a|ba)* | (a|ba)*bb(a|ba)*$ & \tikzxmark \\
 	\hline
 \end{tabular}
 \end{table}
