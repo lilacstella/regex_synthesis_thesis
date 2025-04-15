@@ -125,8 +125,6 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 
 \indent\indent Additionally, the implementation appears to encounter issues in scenarios requiring union operations. In the cases where the synthesis succeeds, the generated solutions exclusively utilize concatenation and Kleene star operations, with no unions present. This suggests a potential flaw in the implementation when handling union operations.
 
-\indent\indent Despite these challenges, the over-approximation and under-approximation heuristics occasionally provide substantial time savings, making their inclusion worthwhile in certain cases. However, when examining the number of states explored in Table~\ref{tab:alpha_regex_performance_states}, the heuristics consistently demonstrate their effectiveness in reducing the search space. They reliably prune unnecessary states and guide the search process in a more efficient direction. This aligns with the findings of the original paper, which reported that while the heuristics were highly effective at limiting the search space, they did not always reduce the time required to find a solution. The overhead introduced by the heuristics could potentially be optimized further in the current implementation to improve overall performance.
-
 \begin{table}[h!]
 	\centering
 	\caption{Performance comparison of regex synthesis methods using the number of states explored/expanded and considered as potential candidate solutions, from the same setup as Table~\ref{tab:alpha_regex_performance_seconds}.}
@@ -147,6 +145,11 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 \end{tabular}
 \end{table}
 
+\indent\indent Despite these challenges, the over-approximation and under-approximation heuristics occasionally provide substantial time savings, making their inclusion worthwhile in certain cases. However, when examining the number of states explored in Table~\ref{tab:alpha_regex_performance_states}, the heuristics consistently demonstrate their effectiveness in reducing the search space. They reliably prune unnecessary states and guide the search process in a more efficient direction. This aligns with the findings of the original paper, which reported that while the heuristics were highly effective at limiting the search space, they did not always reduce the time required to find a solution. The overhead introduced by the heuristics could potentially be optimized further in the current implementation to improve overall performance.
+
+\indent\indent AlphaRegex tends to produce regex expressions that are relatively readable, primarily due to its greedy nature in selecting solutions. This approach often prioritizes simplicity and clarity, making the generated regex easier to interpret and understand. However, this same greedy strategy can lead to challenges when dealing with tasks that require deeper nesting or involve ambiguous patterns. In such cases, the algorithm may fail to explore alternative solutions that could better capture the desired behavior. Additionally, the performance and output of AlphaRegex are highly sensitive to the tuning of its weights. Small adjustments to these weights can significantly influence the synthesis process, potentially leading to either improved results or suboptimal solutions. This sensitivity underscores the importance of careful parameter selection to achieve the desired balance between efficiency and correctness.
+
+
 % \subsection{Weight Analysis}
 
 % \indent\indent We experimented with three different weight configurations to observe how heuristic prioritization changes the generated output. Each configuration emphasizes different regex characteristics: minimal size, reduced use of \texttt{*}, and balanced weight. The results below illustrate how weights impact regex complexity and runtime.
@@ -154,6 +157,66 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 % \indent\indent In the release of the source codes, the weights are set to the default values. The weights are set to the following values:
 
 % TODO 
+
+\section{L* Algorithm Results}
+
+For the initial examples, the majority of proposals tend to default to the empty language. This occurs because the observation table often becomes satisfied and complete once the empty string, single 'a', and single 'b' are all rejected, leading to the conclusion that no strings are accepted.
+
+
+\begin{table}[h!]
+	\centering
+	\caption{The results of the benchmarks synthesized by the L* algorithm, demonstrating its performance in generating regular expressions. The Q column refers to the number of membership queries and the P column refers to the number of equivalence queries verifying proposals.}
+	\label{tab:l_star_outputs}
+		\begin{tabular}{|c|l|c|c|l|}
+		\hline
+		\textbf{No} & \textbf{Description} & \textbf{Q} & \textbf{P} & \textbf{Output} \\
+		\hline
+		1 & Starts with a & 14 & 2 & $a.*$ \\
+		2 & Ends with ab & 21 & 2 & $b*a(a|bbb*a|ba)*b$ \\
+		3 & Contains the substring abab & 29 & 2 & $b*aa*b(aaa*b|bb*aa*b)*ab.*$ \\
+		4 & Begins with b and ends with a & 27 & 3 & $bb*a(bb*a|a)*$ \\
+		5 & Len $\ge$ 3 and 3rd symbol is a & 44 & 3 & $..a.*$ \\
+		6 & Len $\% 3 = 0$ & 17 & 2 & $(...)*$ \\
+		7 & Number of a's is divisible by 3 & 14 & 2 & $(b|ab*ab*a)*$ \\
+		8 & Even number of a's & 5 & 1 & $(b*a(ab*a|b)*ab*|b*)$ \\
+		% 9 & Fifth symbol from the right is b & - & - & $.*b....$ \\
+		% 10 & Alternating a and b & - & - & $(ab)*(a)?|(ba)*(b)?$ \\
+		% 11 & Each a followed by least one b & - & - & $(b|ba)*$ \\
+		% 12 & a$^n$b$^m$ where $n \geq 3$ and $m$ is even. & - & - & $aaa.*(bb)*$ \\
+		% 13 & Have at most two a's & - & - & $b*|b*ab*|b*ab*ab*$ \\
+		% 14 & Start a odd len or b even len & - & - & $a(..)* | b(..)*$ \\
+		% 15 & Length greater than 1 & 20 & 4 & $..*$ \\
+		% 16 & Does not end with ab & 38 & 8 & $?|.|.*(aa|ba|bb)$ \\
+		% 17 & Contain $\ge$ 1 of a and $\le$ 1 of b & 33 & 7 & $aa*|aa*ba*|a*baa*$ \\
+		% 18 & At least two b between any two a & 42 & 9 & $b*a(bb*a)*b*$ \\
+		% 19 & Does not contain baa & 36 & 8 & $(aa|ab|ba?|bb)*a?$ \\
+		% 20 & Every odd position is b & 29 & 6 & $(b.)*b?$ \\
+		% 21 & aa appears exactly once & 48 & 10 & $(b|ab)*aa(b|ab)*$ \\
+		% 22 & Length $\ge 2$ and end is not ba & 31 & 7 & $.*(aa|bb|ab)$ \\
+		% 23 & Even a's, each a has $\ge$ 1 of b & 39 & 8 & $b*(abb*abb*)*b*$ \\
+		% 24 & adjacent $a$'s then adjacent $b$'s & 44 & 9 & $(a|ba)*(bb(a|b)*a?b*)?$ \\
+		% 25 & At most one pair of consecutive b's & 46 & 10 & $(a|ba)* | (a|ba)*bb(a|ba)*$ \\
+		\hline
+	\end{tabular}
+	\end{table}
+
+The L* algorithm generates minimal DFAs, though these do not always correspond to minimal regex, especially when guided by specific counterexamples. Its effectiveness is highly dependent on the quality of the teacher, as the teacher provides membership and equivalence queries to refine the DFA. This approach is best suited for simpler patterns or cases where the teacher can provide precise and consistent feedback.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=9cm]{figures/ends_with_ab.png}
+	\caption{The solution DFA machine to capture a string that ends with ab.}
+	\label{fig:ends_with_ab}
+\end{figure}
+
+The second example, as shown in Figure~\ref{fig:ends_with_ab}, demonstrates a straightforward DFA. However, the resulting regex is unexpectedly long and complex. This is due to the collapsing process of the DFA and the methodology used to derive the regex, as discussed earlier. Similarly, Figure~\ref{fig:even_a} illustrates another simple DFA, yet the derived regex exhibits similar verbosity, highlighting the challenges in minimizing expressions during the conversion process.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=6.5cm]{figures/even_a.png}
+	\caption{The solution DFA machine to capture a string that has an even number of a's.}
+	\label{fig:even_a}
+\end{figure}
 
 \section{LLM Results}
 
@@ -219,7 +282,7 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 
 \indent\indent Benchmarks 14, 15, and 18 all display a common off-by-one counting error—a recurring failure mode for LLMs in tasks that involve precise cardinality constraints. These errors reveal the model's difficulty in reasoning about exact quantities, a known limitation in sequence modeling.
 
-\indent\indent Benchmark 16 contains invalid regex syntax, misusing the ? operator without a preceding token. The intended goal may have been to include optional content, but the structure used violates standard regex grammar. Similarly, benchmark 19 is logically flawed: the use of $$(aa|ab|ba?|bb)*$$ followed by a suffix expression can incorrectly accept strings like bbaa, which should be rejected. This occurs because of incorrect assumptions about how the starred term interacts with the rest of the expression.
+\indent\indent Benchmark 16 contains invalid regex syntax, misusing the ? operator without a preceding token. The intended goal may have been to include optional content, but the structure used violates standard regex grammar. Similarly, benchmark 19 is logically flawed: the use of $(aa|ab|ba?|bb)*$ followed by a suffix expression can incorrectly accept strings like bbaa, which should be rejected. This occurs because of incorrect assumptions about how the starred term interacts with the rest of the expression.
 
 \indent\indent In contrast, benchmark 20 is entirely correct, demonstrating that the model can occasionally capture subtle constraints when the structure of the problem is well-aligned with common representations. However, benchmark 21 fails due to overpermissiveness. The pattern $aa(b|ab)*$ accepts strings like aaab, which includes two pairs of consecutive as—violating the task specification.
 
@@ -228,15 +291,6 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 \indent\indent Finally, benchmarks 24 and 25 are incorrect due to subtle logic flaws. In 24, the use of $(a|b)*$ is too permissive and allows the occurrence of double a after bb, violating the restriction. In 25, the model allows bbba via $bb(a|ba)*$, a construction that does not correctly constrain repetition patterns involving pairs of bs.
 
 \indent\indent Overall, the model's strongest performance appears in problems that are well-aligned with familiar symbolic patterns, especially those involving prefixes, suffixes, or fixed-length structural constraints. As tasks begin to involve negation, exact counting, or nested disjunctions, correctness degrades. Notably, even incorrect outputs often resemble the correct structure, suggesting that the model maintains a surface-level understanding of the domain—but without the formal rigor needed for correctness in all cases.
-\section{Qualitative Observations}
-
-\indent\indent we also look at the quality of the regex generated by each of the three methods. We qualitatively analyzed the generated regex from each method, focusing on readability, complexity, and correctness. The results are summarized below:
-
-\begin{itemize}
-\item \textbf{AlphaRegex:} Tends to generate readable regex due to its greedy nature but struggles with deeper nesting or ambiguous patterns. Sensitive to weight tuning.
-\item \textbf{L* Algorithm:} Provides minimal regex when guided by precise counterexamples. Relies heavily on teacher quality. Most effective with simple patterns.
-\item \textbf{LLMs:} Generates regex quickly, often with impressive readability. However, it frequently overfits to examples or introduces syntax errors.
-\end{itemize}
 
 \section{Integration Synthesis}
 
@@ -251,13 +305,18 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 
 \begin{verbatim}
 if w[0] == 'a' and len(w) % 2 == 1:
-	return True
+    return True
 if w[0] == 'b' and len(w) % 2 == 0:
-	return True
+    return True
 return False
 \end{verbatim}
 
 \indent\indent This Python code can then be used to act as a large art of the MAT answering the membership queries generated by the L* algorithm. By automating the verification process, this approach streamlines the synthesis pipeline and ensures consistency in evaluating correctness.
+
+\subsection{AlphaRegex and L* Integration}
+\indent\indent The integration of AlphaRegex and L* is another promising avenue for future work. By combining the strengths of both methods, we can potentially improve the synthesis process. For example, L* could serve as a guide to generate high-quality examples that AlphaRegex can use to refine its search. This hybrid approach could leverage L*'s ability to systematically explore the space of possible solutions while benefiting from AlphaRegex's heuristics to efficiently navigate the search space.
+
+\indent\indent The integration of these two methods could also address some of the limitations observed in their individual performances. For instance, AlphaRegex's challenges with union operations could be mitigated by L*'s structured generation of counterexamples, which can help AlphaRegex focus on critical areas of the search space. Conversely, AlphaRegex's heuristics could enhance L*'s exploration by providing initial candidates or pruning less promising paths, thereby reducing the number of membership and equivalence queries required.
 
 \section{Discussion}
 
