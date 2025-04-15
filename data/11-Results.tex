@@ -218,6 +218,8 @@ The second example, as shown in Figure~\ref{fig:ends_with_ab}, demonstrates a st
 	\label{fig:even_a}
 \end{figure}
 
+\indent\indent The L* algorithm's reliance on human-provided membership and equivalence queries can lead to a significant number of interactions before arriving at a correct solution. While the algorithm is guaranteed to converge to the correct answer eventually, the process can be tedious and time-consuming, especially for complex benchmarks. This highlights the importance of optimizing the query generation process or integrating automated tools to reduce the burden on human participants. Despite these challenges, the L* algorithm remains a powerful method for synthesizing minimal DFAs and corresponding regex solutions, particularly when paired with a well-designed teacher or automated query system.
+
 \section{LLM Results}
 
 \indent\indent Developing an effective prompt for LLMs to generate regex using only the standard set of operators proved to be an iterative and somewhat delicate process. One of the persistent challenges was conveying that the input alphabet consisted solely of the characters $a$ and $b$. Despite multiple prompt refinements, the model frequently interpreted this constraint as a directive to use the explicit disjunction $(a|b)$, rather than the shorthand $.$ to represent any character within the defined alphabet. This behavior reflects a broader limitation of LLMs: they lack a formal understanding of semantic equivalence. In this case, they fail to recognize that $.$ and $(a|b)$ are functionally identical under a fixed alphabet.
