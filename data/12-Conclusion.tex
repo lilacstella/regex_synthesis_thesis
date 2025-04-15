@@ -23,45 +23,37 @@
 
 \chapter{CONCLUSION AND FUTURE WORK}
 
-\indent\indent This thesis explored three distinct methods for synthesizing regular expressions from examples: AlphaRegex, the L* algorithm, and large language models (LLMs). Each method reflects a different paradigm of synthesis—heuristic search, procedural learning, and neural generation respectively. Our primary research questions focused on how these methods compare in terms of correctness, efficiency, and complexity, and whether combining them can improve performance.
+\section{Conclusion}
 
-\indent\indent Based on our evaluations, AlphaRegex showed strong performance in producing readable and valid regex when guided by carefully tuned weights. L* reliably generated correct and minimal regex in simpler cases but struggled when feedback quality degraded. LLMs demonstrated fast and intuitive outputs but required manual validation due to inconsistencies and overfitting. While each technique had clear trade-offs, preliminary attempts at chaining them—such as LLMs seeding AlphaRegex—proved promising.
+\indent\indent This thesis explored how different synthesis methodologies perform in the constrained task of regex generation. By comparing AlphaRegex, the L* algorithm, and LLMs, we have answered the central research question: how do these approaches compare in correctness, efficiency, and complexity—and could they be combined for better outcomes?
 
-\indent\indent Broadly, our findings support the idea that no single synthesis strategy is sufficient for all cases. A hybrid approach that leverages the strengths of symbolic control, procedural guarantees, and neural priors offers a practical path forward. These insights suggest valuable directions for both synthesis system design and the creation of user-facing tools in developer environments.
+\indent\indent AlphaRegex demonstrates the strength of heuristic search, particularly when weights are carefully tuned. Its flexibility lies in its cost function, which allows for prioritizing minimal length or computation time. However, this comes at the cost of unpredictable performance across benchmarks—too low a hole penalty may produce verbose or invalid solutions, while too high a penalty can lead to excessive runtimes or failure to converge.
 
-\section{Human-in-the-Loop Synthesis}
+\indent\indent The L* algorithm offers a formally grounded approach with guaranteed correctness under a proper teacher. Its output, derived from DFAs, is provably equivalent to the target language, but often lacks elegance or conciseness. Additionally, it is sensitive to the formulation of counterexamples and can be inefficient in practice on complex languages.
 
-\indent\indent A major takeaway from our work is the importance of human participation in guiding synthesis. In the context of regex, the design and quality of test cases play a pivotal role. Future work should investigate:
+\indent\indent LLMs represent a fundamentally different paradigm: they do not search or construct programs in a structured way but instead rely on pattern recognition and learned syntax. Their performance is impressive on benchmarks resembling seen examples, yet fragile when compositional logic or negation is required. We observed degradation in performance as benchmark complexity increased, along with drift from user constraints in long prompting sessions.
 
-\begin{itemize}
-  \item \textbf{What makes a good test?} We propose studying metrics like coverage, discriminative power, and regularity to evaluate test quality.
-  \item \textbf{How can test quality be measured?} One direction is defining a scoring function based on how well tests isolate failure modes across candidate solutions.
-  \item \textbf{How can non-experts be supported?} Future systems might include test suggestion engines, visual feedback, or prompt scaffolding to help users write better inputs.
-\end{itemize}
+\indent\indent Together, these findings suggest that no single method dominates; rather, each has a niche. Chaining methods—for instance, using LLMs for initial guesses, refined by AlphaRegex or verified through L*—offers a promising avenue. Our experiments with heuristic adjustments in AlphaRegex showed that even modest changes in search prioritization can lead to trade-offs in correctness and output readability, highlighting the importance of interpretability and controllability in synthesis.
 
-\section{Tooling and Usability}
+\indent\indent From a broader perspective, this work underscores the importance of test-driven synthesis. The quality of input-output examples or formal constraints fundamentally shapes the success of all three methods. We advocate for further research into human-in-the-loop tools that help users craft effective specifications, guided by intelligent feedback.
 
-\indent\indent Beyond algorithms, usability plays a critical role in synthesis adoption. We propose several improvements:
+\section{Future Work}
+
+\indent\indent From here, there are many potential directions for future work. The following list outlines some of the most promising avenues:
 
 \begin{itemize}
-  \item \textbf{UX for test-driven synthesis:} Interfaces should highlight failure points, visualize input coverage, and offer dynamic guidance.
-  \item \textbf{Test scaffolding tools:} Synthesis systems could suggest additional positive or negative examples to improve solution generalization.
-  \item \textbf{Prompt engineering assistants:} LLM-based tools might help users formulate clearer queries by interpreting ambiguous intent and asking clarifying questions.
+  \item \textbf{Human-in-the-loop synthesis:} Building tools that help users generate, evaluate, and refine test cases could greatly improve synthesis outcomes. Future systems might include example-suggestion engines, test coverage visualizations, or even learning-based test generators.
+
+  \item \textbf{Enhanced chaining strategies:} This work offers only preliminary results in chaining LLMs with traditional synthesizers. A more robust pipeline could involve using LLMs to draft regex, AlphaRegex to refine structure, and L* to verify equivalence.
+
+  \item \textbf{Generalization to other DSLs:} Although this thesis focused on regex, many insights apply to broader program synthesis contexts, including configuration synthesis, data transformation scripts, or query generators.
+
+  \item \textbf{Weight learning and adaptation:} In AlphaRegex, we relied on static weight configurations. Future work could explore meta-learning or reinforcement learning to dynamically tune weights based on benchmark structure.
+
+  \item \textbf{Prompt stability in LLMs:} The degradation observed across long sessions raises the need for tooling or architecture-level improvements to preserve intent and context across multiple invocations.
 \end{itemize}
 
-\section{Expanded Evaluation}
-
-\indent\indent While our benchmark suite covered a range of common patterns, further work is needed to stress-test scalability and generality:
-
-\begin{itemize}
-  \item \textbf{Broader benchmark sets:} Future evaluations should include more diverse and domain-specific examples, such as date/time patterns or log filters.
-  \item \textbf{Complex regex structures:} Synthesizers should be evaluated on nested quantifiers, lookaheads, and optional groups.
-  \item \textbf{Beyond regex:} The insights and tooling developed here could apply to synthesis tasks in other domain-specific languages (DSLs), such as data wrangling scripts, configuration files, or parser generators.
-\end{itemize}
-
-\vspace{1em}
-
-\noindent In closing, this thesis demonstrates that the synthesis of regular expressions remains a rich problem space for exploring fundamental challenges in programming-by-example, system design, and human-machine interaction. Our contributions lay the groundwork for future synthesis systems that are more intelligent, collaborative, and accessible.
+\indent\indent Ultimately, this thesis contributes both a comparative framework and practical implementations of three representative synthesis strategies. It lays the groundwork for building future systems that combine the controllability of symbolic methods with the flexibility of neural networks, all while centering the human user's intent through better test design and feedback tools.
 
 
 

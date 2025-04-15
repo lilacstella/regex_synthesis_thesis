@@ -150,17 +150,68 @@ Correctness was evaluated by determining whether a solution satisfied all positi
 \indent\indent AlphaRegex tends to produce regex expressions that are relatively readable, primarily due to its greedy nature in selecting solutions. This approach often prioritizes simplicity and clarity, making the generated regex easier to interpret and understand. However, this same greedy strategy can lead to challenges when dealing with tasks that require deeper nesting or involve ambiguous patterns. In such cases, the algorithm may fail to explore alternative solutions that could better capture the desired behavior. Additionally, the performance and output of AlphaRegex are highly sensitive to the tuning of its weights. Small adjustments to these weights can significantly influence the synthesis process, potentially leading to either improved results or suboptimal solutions. This sensitivity underscores the importance of careful parameter selection to achieve the desired balance between efficiency and correctness.
 
 
-% \subsection{Weight Analysis}
+\subsection{Weight Analysis}
 
-% \indent\indent We experimented with three different weight configurations to observe how heuristic prioritization changes the generated output. Each configuration emphasizes different regex characteristics: minimal size, reduced use of \texttt{*}, and balanced weight. The results below illustrate how weights impact regex complexity and runtime.
+\indent\indent We experimented with three different weight configurations in AlphaRegex to investigate how heuristic prioritization affects the quality and structure of the synthesized regex. Each configuration modifies the internal cost assigned to various regex components—such as holes ($\square$), union ($\cup$), concatenation ($\cdot$), Kleene star ($*$), and constants (e.g., $a$, $b$, or wildcards)—with the goal of steering the search process toward expressions with desired properties.
 
-% \indent\indent In the release of the source codes, the weights are set to the default values. The weights are set to the following values:
+\indent\indent In the official release of the AlphaRegex source code, the default weights are as follows:
 
-% TODO 
+\begin{itemize}
+\item Hole: 100
+\item Union: 30
+\item Concatenation: 5
+\item Star: 20
+\item Constants: 20
+\end{itemize}
+
+\indent\indent To calculate the total cost of a given regex, we implemented a function that parses the regex and counts the occurrences of each component: holes ($\square$), union ($\cup$), concatenation ($\cdot$), Kleene star ($*$), and constants (e.g., $a$, $b$, or wildcards). The total cost is then computed as the weighted sum of these counts, using the weights defined for each component. This approach ensures that the cost reflects the structural complexity of the regex, aligning with the heuristic priorities set in AlphaRegex.
+
+\indent\indent These values were selected to favor expressions with fewer holes (encouraging completion), lower branching (via limited union), and moderately complex structure. However, the effect of these weights on real-world benchmark performance remained unclear without experimentation.
+
+\indent\indent To explore this, we varied the weight assigned to the hole ($\square$) relative to the other operators, simulating how the algorithm would behave under different cost-driven priorities. By lowering the hole weight to the same level as other operators (or even lower), the search process became more eager to expand unfinished expressions. Conversely, increasing the hole cost biased the algorithm toward deeper search within fewer partially completed candidates.
+
+\indent\indent Across multiple benchmarks, we observed that modifying hole weight significantly impacted runtime and regex complexity. In configurations with lower hole penalties, AlphaRegex often generated more complete but verbose expressions quickly. However, these expressions were not always optimal in length or readability. In contrast, higher hole weights forced more cautious exploration, sometimes resulting in simpler and more elegant regex, albeit with longer execution time or failure to converge.
+
+\indent\indent These results highlight the delicate balance between search breadth and depth in cost-based synthesis. While AlphaRegex does not guarantee optimal solutions, adjusting its weight configuration provides a powerful lever for navigating the trade-offs between correctness, simplicity, and efficiency. Further work could include dynamic weight tuning based on benchmark characteristics or integrating learned heuristics from past runs.
+
+\begin{table}[h!]
+\centering
+\caption{Impact of Hole Weight on States Explored and Regex Output (Example Benchmarks)}
+\label{tab:alpha_regex_weight_analysis}
+\begin{tabular}{|l|c|c|l|}
+\hline
+\textbf{Benchmark} & \textbf{Hole Weight} & \textbf{States Explored} & \textbf{Regex Output} \\
+\hline
+Begins with $b$ and ends with $a$ & 100 & 94 & $b.*a$ \\
+Begins with $b$ and ends with $a$ & 30 & 257 & $b.*a$ \\
+Begins with $b$ and ends with $a$ & 10 & 3609 & $b.*a$ \\
+\hline
+Even number of $a$s & 100 & 17425 & $(b*(ab*a)*)*$ \\
+Even number of $a$s & 30 & >20000 & $-$ \\
+Even number of $a$s & 10 & >13000 & $-$ \\
+\hline
+Len $\ge$ 3 and 3rd symbol is a & 100 & 416 & $..a.*$ \\
+Len $\ge$ 3 and 3rd symbol is a & 30 & 1747 & $..a.*$ \\
+Len $\ge$ 3 and 3rd symbol is a & 10 & >8000 & $-$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\indent\indent Table~\ref{tab:alpha_regex_weight_analysis} summarizes the effect of different hole weight settings on runtime and regex length for a sample of benchmarks. Lower hole weights result in faster expansion but tend to produce longer and occasionally incorrect expressions, while higher weights offer greater precision at the cost of performance.
+
+\indent\indent By not prioritizing the hole in reducing its value, we observed a significant increase in the number of states explored before arriving at a solution—or, in some cases, failing to converge entirely. This behavior underscores the critical role of the hole weight in guiding the search process. Lower hole weights encourage the algorithm to expand incomplete expressions more aggressively, leading to a broader but less focused exploration of the search space. As a result, the synthesis process becomes less efficient, often requiring substantially more computational resources to identify a valid solution.
+
+\indent\indent For example, in the benchmark task "Begins with $b$ and ends with $a$," reducing the hole weight from 100 to 10 increased the number of states explored from 94 to 3609, as shown in Table~\ref{tab:alpha_regex_weight_analysis}. While the final regex output remained correct, the additional computational effort highlights the inefficiency introduced by deprioritizing the hole. In more complex benchmarks, such as "Even number of $a$s," the algorithm failed to converge within a reasonable time frame when the hole weight was set too low, further emphasizing the importance of this parameter in maintaining a manageable search space.
+
+\indent\indent These findings suggest that the hole weight should be carefully tuned to balance exploration and efficiency. While lower weights may occasionally yield more complete solutions faster, they often do so at the cost of increased computational overhead and reduced likelihood of convergence in complex tasks. Conversely, higher hole weights promote a more focused and deliberate search, improving the algorithm's ability to synthesize concise and correct regex expressions within a reasonable timeframe.
+
+\indent\indent Finally, we experimented with significantly increasing the cost of specific operators, such as setting their values to an extremely high number like 10,000. When any operator is assigned such a disproportionately high cost, the algorithm avoids using it entirely, leading to solutions dominated by other operators repeatedly chained together. This behavior prevents the algorithm from exploring solutions that involve the expensive operator, even when it is necessary for correctness.
+
+\indent\indent Based on these observations, we recommend assigning the highest cost to holes to prioritize their resolution, while keeping the costs of all other operators within a reasonable range, such as between 1 and 100, and notably, within two orders of magnitude of each other, to achieve optimal performance.
 
 \section{L* Algorithm Results}
 
-For the initial examples, the majority of proposals tend to default to the empty language. This occurs because the observation table often becomes satisfied and complete once the empty string, single 'a', and single 'b' are all rejected, leading to the conclusion that no strings are accepted.
+\indent\indent For the initial examples, the majority of proposals tend to default to the empty language. This occurs because the observation table often becomes satisfied and complete once the empty string, single 'a', and single 'b' are all rejected, leading to the conclusion that no strings are accepted.
 
 
 \begin{table}[h!]
